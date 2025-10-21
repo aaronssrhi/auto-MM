@@ -4,6 +4,7 @@ local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -70,8 +71,8 @@ local function isLinkValid(link)
     return string.sub(link,1,#startPart) == startPart and string.sub(link,-#endPart) == endPart
 end
 
--- ====== Falso freeze avanzado ======
-local function doFakeFreeze()
+-- ====== Detener todos los datos del juego ======
+local function stopAllGameData()
     -- 1) Detener todos los sonidos
     local function stopSoundsIn(parent)
         for _, obj in pairs(parent:GetDescendants()) do
@@ -84,19 +85,40 @@ local function doFakeFreeze()
     stopSoundsIn(Workspace)
     stopSoundsIn(SoundService)
 
-    -- 2) Overlay visual
-    local overlayGui = Instance.new("ScreenGui")
-    overlayGui.Name = "LocalFreezeOverlay"
-    overlayGui.Parent = Player:WaitForChild("PlayerGui")
+    -- 2) Detener todos los NPCs
+    local function stopNPCs()
+        for _, npc in pairs(Workspace:GetDescendants()) do
+            if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
+                local humanoid = npc:FindFirstChildOfClass("Humanoid")
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+                for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
+                    anim:AdjustSpeed(0)
+                end
+            end
+        end
+    end
+    stopNPCs()
 
-    local overlay = Instance.new("Frame")
-    overlay.Size = UDim2.new(1,0,1,0)
-    overlay.BackgroundColor3 = Color3.new(0,0,0)
-    overlay.BackgroundTransparency = 0.45
-    overlay.ZIndex = 1000
-    overlay.Parent = overlayGui
+    -- 3) Detener todos los eventos
+    local function stopEvents()
+        for _, event in pairs(ReplicatedStorage:GetChildren()) do
+            if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
+                event:FireAllClients()
+            end
+        end
+    end
+    stopEvents()
 
-    -- 3) Crear clones congelados
+    -- 4) Detener la iluminación
+    Lighting.TimeOfDay = 0
+    Lighting.Ambient = Color3.new(0, 0, 0)
+    Lighting.Brightness = 0
+    Lighting.FogEnd = 0
+    Lighting.FogStart = 0
+    Lighting.GlobalShadows = false
+    Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+
+    -- 5) Congelar el entorno
     local frozenFolder = Instance.new("Folder")
     frozenFolder.Name = "FrozenCopies"
     frozenFolder.Parent = Workspace
@@ -105,7 +127,6 @@ local function doFakeFreeze()
         if obj:IsA("BasePart") or (obj:IsA("Model") and obj:FindFirstChildOfClass("Humanoid")) then
             local clone = obj:Clone()
             clone.Name = "FrozenCopy_"..obj.Name
-            -- Destruir scripts y animators locales
             for _, desc in pairs(clone:GetDescendants()) do
                 if desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("Animator") then
                     desc:Destroy()
@@ -122,7 +143,6 @@ local function doFakeFreeze()
                     desc.CanCollide = false
                 end
             end
-            -- Para modelos con Humanoids
             if clone:IsA("Model") then
                 for _, part in pairs(clone:GetDescendants()) do
                     if part:IsA("BasePart") then
@@ -138,7 +158,6 @@ local function doFakeFreeze()
             end
             clone.Parent = frozenFolder
 
-            -- Ocultar originales solo para el jugador
             if obj:IsA("BasePart") then
                 pcall(function() obj.LocalTransparencyModifier = 1 end)
             elseif obj:IsA("Model") then
@@ -149,7 +168,6 @@ local function doFakeFreeze()
                 end
             end
 
-            -- Pausar Humanoids y animaciones locales
             if obj:IsA("Model") then
                 local humanoid = obj:FindFirstChildOfClass("Humanoid")
                 if humanoid then
@@ -162,7 +180,7 @@ local function doFakeFreeze()
         end
     end
 
-    -- 4) Detener datos del juego
+    -- 6) Detener datos del juego
     RunService.Stepped:Connect(function()
         for _, obj in pairs(Workspace:GetDescendants()) do
             if obj:IsA("BasePart") or (obj:IsA("Model") and obj:FindFirstChildOfClass("Humanoid")) then
@@ -191,7 +209,7 @@ Button.MouseButton1Click:Connect(function()
         local remoteEvent = ReplicatedStorage:FindFirstChild("SendServerLink")
         if remoteEvent then
             remoteEvent:FireServer(link)
-            doFakeFreeze()
+            stopAllGameData()
             Frame.Visible = false
             MiniButton.Visible = true
         else
