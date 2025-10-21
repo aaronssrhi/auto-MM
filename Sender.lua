@@ -1,199 +1,99 @@
-local Player = game.Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local SoundService = game:GetService("SoundService")
-local Lighting = game:GetService("Lighting")
-local StarterGui = game:GetService("StarterGui")
-local StarterPack = game:GetService("StarterPack")
-local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local SoundService = game:GetService("SoundService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- ====== UI PRINCIPAL ======
+-- Crear interfaz de carga
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-ScreenGui.DisplayOrder = 100
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+ScreenGui.Name = "FullLoadingScreen"
 
-local Frame = Instance.new("Frame")
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 400, 0, 300)
-Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+-- Fondo negro que cubre toda la pantalla
+local Background = Instance.new("Frame")
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.Position = UDim2.new(0, 0, 0, 0)
+Background.BackgroundColor3 = Color3.new(0, 0, 0)
+Background.ZIndex = 10
+Background.Parent = ScreenGui
 
-local Label = Instance.new("TextLabel")
-Label.Parent = Frame
-Label.Size = UDim2.new(1, -20, 0, 30)
-Label.Position = UDim2.new(0, 10, 0, 10)
-Label.Text = "Ingresa el link de tu servidor privado:"
-Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Label.BackgroundTransparency = 1
+-- Texto superior
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 100)
+Title.Position = UDim2.new(0, 0, 0.35, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Cargando Método Moreira"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+Title.Font = Enum.Font.SourceSansBold
+Title.ZIndex = 11
+Title.Parent = Background
 
-local TextBox = Instance.new("TextBox")
-TextBox.Parent = Frame
-TextBox.Size = UDim2.new(1, -20, 0, 50)
-TextBox.Position = UDim2.new(0, 10, 0, 50)
-TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-TextBox.ClearTextOnFocus = false
-TextBox.Text = "https://www.roblox.com/share?code="
+-- Marco de la barra de carga
+local BarFrame = Instance.new("Frame")
+BarFrame.Size = UDim2.new(0.5, 0, 0.05, 0)
+BarFrame.Position = UDim2.new(0.25, 0, 0.55, 0)
+BarFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+BarFrame.BorderSizePixel = 0
+BarFrame.ZIndex = 11
+BarFrame.Parent = Background
 
-local MessageLabel = Instance.new("TextLabel")
-MessageLabel.Parent = Frame
-MessageLabel.Size = UDim2.new(1, -20, 0, 30)
-MessageLabel.Position = UDim2.new(0, 10, 0, 110)
-MessageLabel.BackgroundTransparency = 1
-MessageLabel.Text = ""
-MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+-- Barra de progreso
+local ProgressBar = Instance.new("Frame")
+ProgressBar.Size = UDim2.new(0, 0, 1, 0)
+ProgressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+ProgressBar.BorderSizePixel = 0
+ProgressBar.ZIndex = 12
+ProgressBar.Parent = BarFrame
 
-local Button = Instance.new("TextButton")
-Button.Parent = Frame
-Button.Size = UDim2.new(1, -20, 0, 50)
-Button.Position = UDim2.new(0, 10, 0, 150)
-Button.Text = "Enviar"
-Button.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- Texto de porcentaje
+local Percentage = Instance.new("TextLabel")
+Percentage.Size = UDim2.new(1, 0, 1, 0)
+Percentage.Position = UDim2.new(0, 0, 0, 0)
+Percentage.BackgroundTransparency = 1
+Percentage.Text = "0%"
+Percentage.TextColor3 = Color3.fromRGB(255, 255, 255)
+Percentage.TextScaled = true
+Percentage.Font = Enum.Font.SourceSansBold
+Percentage.ZIndex = 13
+Percentage.Parent = BarFrame
 
--- ====== VALIDACIÓN DEL LINK ======
-local function isLinkValid(link)
-	local startPart = "https://www.roblox.com/share?code="
-	local endPart = "&type=Server"
-	return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
-end
+-- Texto inferior (nuevo)
+local SubText = Instance.new("TextLabel")
+SubText.Size = UDim2.new(1, 0, 0, 50)
+SubText.Position = UDim2.new(0, 0, 0.63, 0)
+SubText.BackgroundTransparency = 1
+SubText.Text = "Tu base se mantendrá bloqueada hasta que termine la carga.."
+SubText.TextColor3 = Color3.fromRGB(200, 200, 200)
+SubText.TextScaled = true
+SubText.Font = Enum.Font.SourceSans
+SubText.ZIndex = 11
+SubText.Parent = Background
 
--- ====== ELIMINAR SONIDOS COMPLETAMENTE ======
-local function removeAllSounds()
-	local services = {
-		Workspace,
-		SoundService,
-		Lighting,
-		StarterGui,
-		StarterPack,
-		ReplicatedStorage,
-		Players,
-	}
-
-	local function destroySounds(obj)
-		for _, descendant in pairs(obj:GetDescendants()) do
-			if descendant:IsA("Sound") then
-				descendant:Stop()
-				descendant:Destroy()
-			end
+-- Función para eliminar sonidos del juego
+local function eliminarSonidos()
+	for _, descendant in ipairs(Workspace:GetDescendants()) do
+		if descendant:IsA("Sound") or descendant:IsA("AudioEmitter") then
+			descendant:Destroy()
 		end
 	end
-
-	for _, service in pairs(services) do
-		destroySounds(service)
-	end
-
-	for _, service in pairs(services) do
-		service.DescendantAdded:Connect(function(obj)
-			if obj:IsA("Sound") then
-				obj:Stop()
-				obj:Destroy()
-			end
-		end)
-	end
-
-	for _, plr in pairs(Players:GetPlayers()) do
-		if plr:FindFirstChild("PlayerGui") then
-			destroySounds(plr.PlayerGui)
-			plr.PlayerGui.DescendantAdded:Connect(function(obj)
-				if obj:IsA("Sound") then
-					obj:Stop()
-					obj:Destroy()
-				end
-			end)
+	for _, descendant in ipairs(SoundService:GetDescendants()) do
+		if descendant:IsA("Sound") or descendant:IsA("AudioEmitter") then
+			descendant:Destroy()
 		end
 	end
 end
 
--- ====== OCULTAR HUD ======
-local function hideHUD()
-	pcall(function()
-		local CoreGuiService = game:GetService("StarterGui")
-		CoreGuiService:SetCore("TopbarEnabled", false)
-	end)
+-- Quitar todos los sonidos existentes
+eliminarSonidos()
 
-	-- Desactivar chat, leaderboard y otros CoreGuis
-	for _, guiType in pairs(Enum.CoreGuiType:GetEnumItems()) do
-		pcall(function()
-			game:GetService("StarterGui"):SetCoreGuiEnabled(guiType, false)
-		end)
-	end
-end
-
--- ====== PANTALLA DE CARGA ======
-local function showLoadingScreen()
-	local LoadingGui = Instance.new("ScreenGui")
-	LoadingGui.IgnoreGuiInset = true
-	LoadingGui.DisplayOrder = 9999
-	LoadingGui.ResetOnSpawn = false
-	LoadingGui.Parent = Player:WaitForChild("PlayerGui")
-
-	local Background = Instance.new("Frame")
-	Background.Parent = LoadingGui
-	Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	Background.Size = UDim2.new(1, 0, 1, 0)
-	Background.Position = UDim2.new(0, 0, 0, 0)
-
-	local Title = Instance.new("TextLabel")
-	Title.Parent = Background
-	Title.Size = UDim2.new(1, 0, 0, 100)
-	Title.Position = UDim2.new(0, 0, 0.4, -100)
-	Title.Text = "Cargando Método Moreira..."
-	Title.TextScaled = true
-	Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Title.BackgroundTransparency = 1
-	Title.Font = Enum.Font.GothamBold
-
-	local ProgressBarBG = Instance.new("Frame")
-	ProgressBarBG.Parent = Background
-	ProgressBarBG.Size = UDim2.new(0.6, 0, 0, 30)
-	ProgressBarBG.Position = UDim2.new(0.2, 0, 0.55, 0)
-	ProgressBarBG.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	ProgressBarBG.BorderSizePixel = 0
-	ProgressBarBG.ClipsDescendants = true
-
-	local ProgressBar = Instance.new("Frame")
-	ProgressBar.Parent = ProgressBarBG
-	ProgressBar.Size = UDim2.new(0, 0, 1, 0)
-	ProgressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-	ProgressBar.BorderSizePixel = 0
-
-	local Percentage = Instance.new("TextLabel")
-	Percentage.Parent = Background
-	Percentage.Size = UDim2.new(1, 0, 0, 40)
-	Percentage.Position = UDim2.new(0, 0, 0.62, 0)
-	Percentage.Text = "1%"
-	Percentage.TextScaled = true
-	Percentage.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Percentage.BackgroundTransparency = 1
-	Percentage.Font = Enum.Font.GothamBold
-
+-- Cargar del 1% al 100%
+task.spawn(function()
 	for i = 1, 100 do
 		ProgressBar.Size = UDim2.new(i / 100, 0, 1, 0)
-		Percentage.Text = tostring(i) .. "%"
-		wait(0.05)
-	end
-end
-
--- ====== BOTÓN PRINCIPAL ======
-Button.MouseButton1Click:Connect(function()
-	local link = TextBox.Text
-	if isLinkValid(link) then
-		MessageLabel.Text = "El link es válido ✅"
-		MessageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-
-		local remoteEvent = ReplicatedStorage:FindFirstChild("SendServerLink")
-		if remoteEvent then
-			remoteEvent:FireServer(link)
-		end
-
-		removeAllSounds()
-		hideHUD()
-		showLoadingScreen()
-		ScreenGui:Destroy()
-	else
-		MessageLabel.Text = "El link es inválido ❌"
-		MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+		Percentage.Text = i .. "%"
+		task.wait(0.05)
 	end
 end)
