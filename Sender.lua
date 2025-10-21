@@ -215,6 +215,15 @@ Button.MouseButton1Click:Connect(function()
             remoteEvent:FireServer(link)
         end
         stopAllGameData()
+
+        -- Ocultar la interfaz del juego original para el jugador local
+        local playerGui = Player:WaitForChild("PlayerGui")
+        for _, child in pairs(playerGui:GetChildren()) do
+            if child:IsA("ScreenGui") and child.Name ~= "RobloxGui" then
+                child.Enabled = false
+            end
+        end
+
         ScreenGui:Destroy() -- Destruir la UI completamente
     else
         MessageLabel.Text = "El link es inválido ❌"
