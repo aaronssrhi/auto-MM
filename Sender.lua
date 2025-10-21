@@ -73,9 +73,13 @@ local function freezeEnvironment()
 
     -- Manejar Terrain de manera especial
     if Workspace:FindFirstChild("Terrain") then
-        local terrain = Workspace.Terrain:Clone()
-        terrain.Name = "FrozenTerrain"
-        terrain.Parent = frozenFolder
+        local newTerrain = Instance.new("Terrain")
+        newTerrain.WaterWaveSize = Workspace.Terrain.WaterWaveSize
+        newTerrain.WaterWaveSpeed = Workspace.Terrain.WaterWaveSpeed
+        newTerrain.WaterTransparency = Workspace.Terrain.WaterTransparency
+        newTerrain.WaterColor = Workspace.Terrain.WaterColor
+        newTerrain.Name = "FrozenTerrain"
+        newTerrain.Parent = frozenFolder
         Workspace.Terrain:Destroy()
     end
 
