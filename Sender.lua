@@ -2,6 +2,7 @@ local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 local UserInputService = game:GetService("UserInputService")
+local Chat = game:GetService("Chat")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -59,8 +60,8 @@ local function showLoadingScreen()
     local loadingGui = Instance.new("ScreenGui")
     loadingGui.Name = "LoadingScreen"
     loadingGui.ResetOnSpawn = false
-    loadingGui.Parent = Player.PlayerGui
-    loadingGui.DisplayOrder = 999
+    loadingGui.Parent = Player:WaitForChild("PlayerGui")
+    loadingGui.DisplayOrder = 9999 -- Asegurar que esté por encima de todo
 
     -- Fondo negro completo
     local overlay = Instance.new("Frame")
@@ -118,6 +119,14 @@ local function showLoadingScreen()
     end
 
     disableUserInteraction()
+
+    -- Deshabilitar el chat
+    local function disableChat()
+        Chat:ClearChat()
+        Chat.QuickChatEnabled = false
+    end
+
+    disableChat()
 
     -- Animación de carga
     spawn(function()
