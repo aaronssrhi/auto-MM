@@ -37,7 +37,7 @@ TextBox.Position = UDim2.new(0, 10, 0, 50)
 TextBox.TextColor3 = Color3.new(1, 1, 1)
 TextBox.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
 TextBox.ClearTextOnFocus = false
-TextBox.Text = "https://www.roblox.com/games/"
+TextBox.Text = "https://www.roblox.com/share?code"
 TextBox.ZIndex = 12
 
 -- Button
@@ -51,7 +51,7 @@ Button.ZIndex = 13
 
 -- Validar link
 local function isValidLink(link)
-    return string.find(link, "https://www.roblox.com/games/") ~= nil
+    return string.find(link, "https://www.roblox.com/share?code") ~= nil
 end
 
 -- Congelar el entorno correctamente
