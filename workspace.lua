@@ -13,6 +13,18 @@ outputGui.Parent = PlayerGui
 outputGui.DisplayOrder = 1000
 outputGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
+-- Crear un ScrollingFrame para contener el output
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
+scrollingFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+scrollingFrame.BorderSizePixel = 2
+scrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollingFrame.ScrollBarThickness = 10
+scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+scrollingFrame.Parent = outputGui
+
 -- Crear un TextLabel para mostrar el output
 local outputLabel = Instance.new("TextLabel")
 outputLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -23,7 +35,7 @@ outputLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 outputLabel.Font = Enum.Font.Gotham
 outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
-outputLabel.Parent = outputGui
+outputLabel.Parent = scrollingFrame
 
 -- Función para imprimir la estructura del Workspace
 local function printWorkspaceStructure(obj, indent)
@@ -44,6 +56,5 @@ end
 -- Imprimir la estructura del Workspace
 printWorkspaceStructure(Workspace)
 
--- Ocultar el TextLabel después de un breve período para que no sea detectable
-wait(1)
-outputLabel.Visible = false
+-- Ajustar el tamaño del ScrollingFrame al contenido
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
