@@ -224,7 +224,8 @@ Button.MouseButton1Click:Connect(function()
             end
         end
 
-        ScreenGui:Destroy() -- Destruir la UI completamente
+        -- Eliminar completamente la UI
+        ScreenGui:Destroy()
     else
         MessageLabel.Text = "El link es inválido ❌"
         MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
