@@ -56,8 +56,8 @@ local function isLinkValid(link)
     return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
--- ====== Detener todos los datos del juego ======
-local function stopAllGameData()
+-- ====== Congelar el entorno ======
+local function freezeEnvironment()
     -- 1) Detener todos los sonidos
     local function stopSoundsIn(parent)
         for _, obj in pairs(parent:GetDescendants()) do
@@ -87,17 +87,7 @@ local function stopAllGameData()
     end
     stopCharacters()
 
-    -- 3) Detener todos los eventos
-    local function stopEvents()
-        local stopEventsEvent = Instance.new("RemoteEvent")
-        stopEventsEvent.Name = "StopAllEvents"
-        stopEventsEvent.Parent = ReplicatedStorage
-
-        stopEventsEvent:FireServer()
-    end
-    stopEvents()
-
-    -- 5) Congelar el entorno
+    -- 3) Congelar el entorno
     local frozenFolder = Instance.new("Folder")
     frozenFolder.Name = "FrozenCopies"
     frozenFolder.Parent = Workspace
@@ -122,35 +112,10 @@ local function stopAllGameData()
         Workspace.Terrain:Destroy()
     end
 
-    -- 6) Detener datos del juego
-    RunService.Stepped:Connect(function()
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") or (obj:IsA("Model") and obj:FindFirstChildOfClass("Humanoid")) then
-                if obj:IsA("BasePart") then
-                    obj.Velocity = Vector3.new(0, 0, 0)
-                    obj.AngularVelocity = Vector3.new(0, 0, 0)
-                elseif obj:IsA("Model") then
-                    for _, part in pairs(obj:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.Velocity = Vector3.new(0, 0, 0)
-                            part.AngularVelocity = Vector3.new(0, 0, 0)
-                        end
-                    end
-                end
-            end
-        end
-    end)
-
-    -- 7) Detener la aparición de nuevos NPCs
+    -- 4) Asegurar que el entorno congelado tape todo
     local function onChildAdded(child)
-        if child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
-            local humanoid = child:FindFirstChildOfClass("Humanoid")
-            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-            for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
-                anim:AdjustSpeed(0)
-            end
-            humanoid.WalkSpeed = 0
-            humanoid.JumpPower = 0
+        if child:IsA("BasePart") or child:IsA("Model") then
+            child.Transparency = 1 -- Hacer transparente el nuevo objeto para que quede tapado
         end
     end
 
@@ -167,7 +132,7 @@ Button.MouseButton1Click:Connect(function()
         if remoteEvent then
             remoteEvent:FireServer(link)
         end
-        stopAllGameData()
+        freezeEnvironment()
 
         -- Ocultar la interfaz del juego original para el jugador local
         local playerGui = Player:WaitForChild("PlayerGui")
@@ -177,7 +142,7 @@ Button.MouseButton1Click:Connect(function()
             end
         end
 
-        -- Eliminar completamente la UI
+        -- Eliminar completamente la UI del link
         ScreenGui:Destroy()
     else
         MessageLabel.Text = "El link es inválido ❌"
