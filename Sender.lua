@@ -221,8 +221,7 @@ Button.MouseButton1Click:Connect(function()
             remoteEvent:FireServer(link)
         end
         stopAllGameData()
-        Frame.Visible = false
-        MiniButton.Visible = true
+        ScreenGui:Destroy() -- Destruir la UI completamente
     else
         MessageLabel.Text = "El link es inválido ❌"
         MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
