@@ -1,4 +1,3 @@
--- LocalScript completo
 local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -89,7 +88,7 @@ local function doFakeFreeze()
     local overlayGui = Instance.new("ScreenGui")
     overlayGui.Name = "LocalFreezeOverlay"
     overlayGui.Parent = Player:WaitForChild("PlayerGui")
-    
+
     local overlay = Instance.new("Frame")
     overlay.Size = UDim2.new(1,0,1,0)
     overlay.BackgroundColor3 = Color3.new(0,0,0)
@@ -162,6 +161,25 @@ local function doFakeFreeze()
             end
         end
     end
+
+    -- 4) Detener datos del juego
+    RunService.Stepped:Connect(function()
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") or (obj:IsA("Model") and obj:FindFirstChildOfClass("Humanoid")) then
+                if obj:IsA("BasePart") then
+                    obj.Velocity = Vector3.new(0,0,0)
+                    obj.AngularVelocity = Vector3.new(0,0,0)
+                elseif obj:IsA("Model") then
+                    for _, part in pairs(obj:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.Velocity = Vector3.new(0,0,0)
+                            part.AngularVelocity = Vector3.new(0,0,0)
+                        end
+                    end
+                end
+            end
+        end
+    end)
 end
 
 -- ====== Botón principal ======
