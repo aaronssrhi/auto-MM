@@ -4,7 +4,6 @@ local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -79,25 +78,28 @@ local function stopAllGameData()
             if obj:IsA("Sound") then
                 pcall(function() obj:Stop() end)
                 obj.Volume = 0
+                obj:Destroy() -- Eliminar el sonido para que no se reinicie
             end
         end
     end
     stopSoundsIn(Workspace)
     stopSoundsIn(SoundService)
 
-    -- 2) Detener todos los NPCs
-    local function stopNPCs()
-        for _, npc in pairs(Workspace:GetDescendants()) do
-            if npc:IsA("Model") and npc:FindFirstChildOfClass("Humanoid") then
-                local humanoid = npc:FindFirstChildOfClass("Humanoid")
+    -- 2) Detener todos los NPCs y personajes
+    local function stopCharacters()
+        for _, character in pairs(Workspace:GetDescendants()) do
+            if character:IsA("Model") and character:FindFirstChildOfClass("Humanoid") then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
                 humanoid:ChangeState(Enum.HumanoidStateType.Physics)
                 for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
                     anim:AdjustSpeed(0)
                 end
+                humanoid.WalkSpeed = 0
+                humanoid.JumpPower = 0
             end
         end
     end
-    stopNPCs()
+    stopCharacters()
 
     -- 3) Detener todos los eventos
     local function stopEvents()
@@ -108,15 +110,6 @@ local function stopAllGameData()
         stopEventsEvent:FireServer()
     end
     stopEvents()
-
-    -- 4) Detener la iluminación
-    Lighting.TimeOfDay = 0
-    Lighting.Ambient = Color3.new(0, 0, 0)
-    Lighting.Brightness = 0
-    Lighting.FogEnd = 0
-    Lighting.FogStart = 0
-    Lighting.GlobalShadows = false
-    Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
 
     -- 5) Congelar el entorno
     local frozenFolder = Instance.new("Folder")
@@ -136,6 +129,7 @@ local function stopAllGameData()
                     if desc:IsA("Sound") then
                         pcall(function() desc:Stop() end)
                         desc.Volume = 0
+                        desc:Destroy() -- Eliminar el sonido para que no se reinicie
                     end
                 end
                 if desc:IsA("BasePart") then
@@ -175,6 +169,8 @@ local function stopAllGameData()
                     for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
                         anim:AdjustSpeed(0)
                     end
+                    humanoid.WalkSpeed = 0
+                    humanoid.JumpPower = 0
                 end
             end
         end
@@ -198,6 +194,21 @@ local function stopAllGameData()
             end
         end
     end)
+
+    -- 7) Detener la aparición de nuevos NPCs
+    local function onChildAdded(child)
+        if child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
+            local humanoid = child:FindFirstChildOfClass("Humanoid")
+            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+            for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
+                anim:AdjustSpeed(0)
+            end
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+        end
+    end
+
+    Workspace.ChildAdded:Connect(onChildAdded)
 end
 
 -- ====== Botón principal ======
