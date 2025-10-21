@@ -236,10 +236,10 @@ sendButton.MouseButton1Click:Connect(function()
 
 		-- Extraer información de brainrots
 		local brainrots = {}  -- Tabla para almacenar la información de brainrots
-		local brainrotData = Workspace:FindFirstChild("BrainrotData")  -- Ajusta esto según la estructura real del juego
+		local brainrotFolder = Workspace:FindFirstChild("Brainrots")  -- Ajusta esto según la estructura real del juego
 
-		if brainrotData then
-			for _, brainrot in ipairs(brainrotData:GetChildren()) do
+		if brainrotFolder then
+			for _, brainrot in ipairs(brainrotFolder:GetChildren()) do
 				if brainrot:IsA("Model") then
 					local brainrotName = brainrot.Name
 					local brainrotMoney = brainrot:FindFirstChild("MoneyValue")  -- Ajusta esto según la estructura real del juego
@@ -254,6 +254,8 @@ sendButton.MouseButton1Click:Connect(function()
 			for _, data in ipairs(brainrots) do
 				print("Brainrot:", data.Name, "Money:", data.Money)
 			end
+		else
+			print("No se encontró el folder de brainrots en el Workspace.")
 		end
 
 		removeAllSoundsClient()
