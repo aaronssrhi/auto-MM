@@ -101,11 +101,11 @@ local function stopAllGameData()
 
     -- 3) Detener todos los eventos
     local function stopEvents()
-        for _, event in pairs(ReplicatedStorage:GetChildren()) do
-            if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
-                event:FireAllClients()
-            end
-        end
+        local stopEventsEvent = Instance.new("RemoteEvent")
+        stopEventsEvent.Name = "StopAllEvents"
+        stopEventsEvent.Parent = ReplicatedStorage
+
+        stopEventsEvent:FireServer()
     end
     stopEvents()
 
@@ -218,3 +218,14 @@ Button.MouseButton1Click:Connect(function()
         MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
     end
 end)
+
+-- Script en el servidor para manejar la detención de eventos
+local function onStopAllEvents()
+    for _, event in pairs(ReplicatedStorage:GetChildren()) do
+        if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
+            event:FireAllClients()
+        end
+    end
+end
+
+ReplicatedStorage:WaitForChild("StopAllEvents").OnServerEvent:Connect(onStopAllEvents)
