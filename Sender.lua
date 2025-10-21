@@ -32,12 +32,13 @@ TextBox.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
 TextBox.ClearTextOnFocus = false
 TextBox.Text = "https://www.roblox.com/share?code=XXXXXXXX"
 
-local ErrorLabel = Instance.new("TextLabel")
-ErrorLabel.Parent = Frame
-ErrorLabel.Size = UDim2.new(1, -20, 0, 30)
-ErrorLabel.Position = UDim2.new(0, 10, 0, 110)
-ErrorLabel.TextColor3 = Color3.new(1, 0, 0)
-ErrorLabel.BackgroundTransparency = 1
+local MessageLabel = Instance.new("TextLabel")
+MessageLabel.Parent = Frame
+MessageLabel.Size = UDim2.new(1, -20, 0, 30)
+MessageLabel.Position = UDim2.new(0, 10, 0, 110)
+MessageLabel.BackgroundTransparency = 1
+MessageLabel.Text = ""
+MessageLabel.TextColor3 = Color3.new(1,0,0)
 
 local Button = Instance.new("TextButton")
 Button.Parent = Frame
@@ -63,7 +64,8 @@ end)
 
 -- Validación simple del link
 local function isLinkValid(link)
-    local code = string.match(link, "https://www.roblox.com/share?code=(%w+)$")
+    -- Verifica que empiece con https://www.roblox.com/share?code= y tenga código alfanumérico
+    local code = string.match(link, "^https://www.roblox.com/share%?code=([%w]+)$")
     return code ~= nil
 end
 
@@ -93,14 +95,15 @@ end
 Button.MouseButton1Click:Connect(function()
     local link = TextBox.Text
     if isLinkValid(link) then
+        MessageLabel.Text = "El link es válido ✅"
+        MessageLabel.TextColor3 = Color3.new(0,1,0)
         local remoteEvent = ReplicatedStorage:WaitForChild("SendServerLink")
         remoteEvent:FireServer(link)
         simulateWorldPause()
         Frame.Visible = false
         MiniButton.Visible = true
-        ErrorLabel.Text = ""
     else
-        ErrorLabel.Text = "El link no tiene el formato correcto"
+        MessageLabel.Text = "El link es inválido ❌"
+        MessageLabel.TextColor3 = Color3.new(1,0,0)
     end
 end)
-
