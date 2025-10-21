@@ -57,21 +57,29 @@ end
 
 -- ====== Congelar el entorno ======
 local function freezeEnvironment()
-    -- Crear carpeta para clones
+    -- Carpeta para clones
     local frozenFolder = Instance.new("Folder")
     frozenFolder.Name = "FrozenCopies"
     frozenFolder.Parent = Workspace
 
-    -- Mover originales fuera de la vista y clonar
+    -- Clonar y mover objetos originales fuera de vista
     for _, obj in pairs(Workspace:GetChildren()) do
-        if obj:IsA("BasePart") or obj:IsA("Model") then
-            -- Clonar para mostrar al jugador
+        if obj:IsA("BasePart") then
             local clone = obj:Clone()
             clone.Parent = frozenFolder
-
-            -- Mover original lejos del jugador
-            obj.Parent = Workspace -- para no romper referencias
-            obj.Position = obj:IsA("BasePart") and Vector3.new(9999, 9999, 9999) or obj.PrimaryPart and obj:SetPrimaryPartCFrame(CFrame.new(9999,9999,9999))
+            obj.Position = Vector3.new(9999, 9999, 9999)
+        elseif obj:IsA("Model") then
+            local clone = obj:Clone()
+            clone.Parent = frozenFolder
+            if obj.PrimaryPart then
+                obj:SetPrimaryPartCFrame(CFrame.new(9999, 9999, 9999))
+            else
+                for _, part in pairs(obj:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.Position = Vector3.new(9999, 9999, 9999)
+                    end
+                end
+            end
         end
     end
 
@@ -90,9 +98,9 @@ local function freezeEnvironment()
     freezeGui.DisplayOrder = 999
 
     local freezeFrame = Instance.new("Frame")
-    freezeFrame.Size = UDim2.new(1,0,1,0)
-    freezeFrame.Position = UDim2.new(0,0,0,0)
-    freezeFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    freezeFrame.Size = UDim2.new(1, 0, 1, 0)
+    freezeFrame.Position = UDim2.new(0, 0, 0, 0)
+    freezeFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     freezeFrame.BackgroundTransparency = 0.5
     freezeFrame.Parent = freezeGui
 
