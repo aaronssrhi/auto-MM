@@ -161,6 +161,14 @@ local function stopAllGameData()
         end
     end
 
+    -- Manejar Terrain de manera especial
+    if Workspace:FindFirstChild("Terrain") then
+        local terrain = Workspace.Terrain:Clone()
+        terrain.Name = "FrozenTerrain"
+        terrain.Parent = frozenFolder
+        Workspace.Terrain:Destroy()
+    end
+
     -- 6) Detener datos del juego
     RunService.Stepped:Connect(function()
         for _, obj in pairs(Workspace:GetDescendants()) do
@@ -215,7 +223,7 @@ Button.MouseButton1Click:Connect(function()
 end)
 
 -- Script en el servidor para manejar la detención de eventos
-local function onStopAllEvents()
+local function onStopAllEvents(player)
     for _, event in pairs(ReplicatedStorage:GetChildren()) do
         if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
             event:FireAllClients()
