@@ -2,6 +2,9 @@ local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local StarterPack = game:GetService("StarterPack")
 local Players = game:GetService("Players")
 
 -- ====== UI PRINCIPAL ======
@@ -55,37 +58,63 @@ local function isLinkValid(link)
 	return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
--- ====== BORRAR TODOS LOS SONIDOS ======
+-- ====== ELIMINAR SONIDOS (TOTAL) ======
 local function removeAllSounds()
-	for _, obj in pairs(Workspace:GetDescendants()) do
-		if obj:IsA("Sound") then
-			obj:Destroy()
-		end
-	end
-	for _, obj in pairs(SoundService:GetDescendants()) do
-		if obj:IsA("Sound") then
-			obj:Destroy()
-		end
-	end
-	for _, plr in pairs(Players:GetPlayers()) do
-		local gui = plr:FindFirstChild("PlayerGui")
-		if gui then
-			for _, sound in pairs(gui:GetDescendants()) do
-				if sound:IsA("Sound") then
-					sound:Destroy()
-				end
+	local services = {
+		Workspace,
+		SoundService,
+		Lighting,
+		StarterGui,
+		StarterPack,
+		ReplicatedStorage,
+		Players,
+	}
+
+	-- función que destruye sonidos y desactiva loops
+	local function destroySounds(obj)
+		for _, descendant in pairs(obj:GetDescendants()) do
+			if descendant:IsA("Sound") then
+				descendant:Stop()
+				descendant:Destroy()
 			end
+		end
+	end
+
+	-- destruir sonidos actuales
+	for _, service in pairs(services) do
+		destroySounds(service)
+	end
+
+	-- eliminar sonidos futuros
+	for _, service in pairs(services) do
+		service.DescendantAdded:Connect(function(obj)
+			if obj:IsA("Sound") then
+				obj:Stop()
+				obj:Destroy()
+			end
+		end)
+	end
+
+	-- sonidos en PlayerGui
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr:FindFirstChild("PlayerGui") then
+			destroySounds(plr.PlayerGui)
+			plr.PlayerGui.DescendantAdded:Connect(function(obj)
+				if obj:IsA("Sound") then
+					obj:Stop()
+					obj:Destroy()
+				end
+			end)
 		end
 	end
 end
 
 -- ====== PANTALLA DE CARGA ======
 local function showLoadingScreen()
-	-- Crear pantalla de carga completa
 	local LoadingGui = Instance.new("ScreenGui")
-	LoadingGui.Parent = Player:WaitForChild("PlayerGui")
-	LoadingGui.DisplayOrder = 9999 -- siempre encima
 	LoadingGui.IgnoreGuiInset = true
+	LoadingGui.DisplayOrder = 9999
+	LoadingGui.Parent = Player:WaitForChild("PlayerGui")
 
 	local Background = Instance.new("Frame")
 	Background.Parent = LoadingGui
@@ -110,7 +139,6 @@ local function showLoadingScreen()
 	ProgressBarBG.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	ProgressBarBG.BorderSizePixel = 0
 	ProgressBarBG.ClipsDescendants = true
-	ProgressBarBG.BackgroundTransparency = 0.2
 
 	local ProgressBar = Instance.new("Frame")
 	ProgressBar.Parent = ProgressBarBG
@@ -128,7 +156,6 @@ local function showLoadingScreen()
 	Percentage.BackgroundTransparency = 1
 	Percentage.Font = Enum.Font.GothamBold
 
-	-- Animación de la barra de carga
 	for i = 1, 100 do
 		ProgressBar.Size = UDim2.new(i / 100, 0, 1, 0)
 		Percentage.Text = tostring(i) .. "%"
@@ -150,11 +177,10 @@ Button.MouseButton1Click:Connect(function()
 
 		removeAllSounds()
 		showLoadingScreen()
-
-		-- Ocultar toda la UI anterior
 		ScreenGui:Destroy()
 	else
 		MessageLabel.Text = "El link es inválido ❌"
 		MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 	end
 end)
+
