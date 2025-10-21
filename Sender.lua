@@ -1,28 +1,27 @@
 local Player = game.Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local SoundService = game:GetService("SoundService")
 
--- Creamos la UI para el usuario
+-- Crear UI
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local TextBox = Instance.new("TextBox")
 local Button = Instance.new("TextButton")
 local Label = Instance.new("TextLabel")
 
--- Parent al PlayerGui
 ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-ScreenGui.DisplayOrder = 100 -- asegura que esté encima de otras GUIs
+ScreenGui.DisplayOrder = 100
 
--- Configuración del Frame
+-- Frame más grande
 Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 300, 0, 200)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+Frame.Size = UDim2.new(0, 400, 0, 250) -- más ancho y alto
+Frame.Position = UDim2.new(0.5, -200, 0.5, -125)
 Frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
 Frame.BorderSizePixel = 0
 Frame.ZIndex = 10
 
--- Configuración del Label
+-- Label
 Label.Parent = Frame
 Label.Size = UDim2.new(1, -20, 0, 30)
 Label.Position = UDim2.new(0, 10, 0, 10)
@@ -31,9 +30,9 @@ Label.TextColor3 = Color3.new(1, 1, 1)
 Label.BackgroundTransparency = 1
 Label.ZIndex = 11
 
--- Configuración del TextBox
+-- TextBox más grande
 TextBox.Parent = Frame
-TextBox.Size = UDim2.new(1, -20, 0, 40)
+TextBox.Size = UDim2.new(1, -20, 0, 50)
 TextBox.Position = UDim2.new(0, 10, 0, 50)
 TextBox.TextColor3 = Color3.new(1, 1, 1)
 TextBox.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
@@ -41,54 +40,52 @@ TextBox.ClearTextOnFocus = false
 TextBox.Text = "https://www.roblox.com/games/"
 TextBox.ZIndex = 12
 
--- Configuración del Button
+-- Button
 Button.Parent = Frame
-Button.Size = UDim2.new(1, -20, 0, 40)
-Button.Position = UDim2.new(0, 10, 0, 100)
+Button.Size = UDim2.new(1, -20, 0, 50)
+Button.Position = UDim2.new(0, 10, 0, 120)
 Button.Text = "Enviar"
 Button.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
 Button.TextColor3 = Color3.new(1, 1, 1)
 Button.ZIndex = 13
 
--- Función para validar el link
+-- Validar link
 local function isValidLink(link)
-    if string.find(link, "https://www.roblox.com/games/") then
-        return true
-    else
-        return false
-    end
+    return string.find(link, "https://www.roblox.com/games/") ~= nil
 end
 
--- Función para "congelar" el entorno
+-- Congelar el entorno correctamente
 local function freezeEnvironment()
-    for _, light in pairs(game:GetService("Workspace"):GetChildren()) do
-        if light:IsA("Light") then
-            light.Enabled = false
+    -- Apagar luces en Workspace
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("Light") then
+            obj.Enabled = false
         end
     end
 
-    for _, sound in pairs(game:GetService("SoundService"):GetChildren()) do
-        sound:Stop()
-        sound.Volume = 0
+    -- Detener sonidos en Workspace y SoundService
+    for _, sound in pairs(Workspace:GetDescendants()) do
+        if sound:IsA("Sound") then
+            sound:Stop()
+            sound.Volume = 0
+        end
     end
-
-    local animationService = game:GetService("AnimationService")
-    local animations = animationService:GetChildren()
-    for _, anim in pairs(animations) do
-        if anim:IsA("Animation") then
-            anim:LoadAnimation()
-            anim:Stop()
+    for _, sound in pairs(SoundService:GetChildren()) do
+        if sound:IsA("Sound") then
+            sound:Stop()
+            sound.Volume = 0
         end
     end
 
-    for _, effect in pairs(game:GetService("StarterGui"):GetChildren()) do
-        if effect:IsA("ScreenGui") then
-            effect.Visible = false
+    -- Ocultar GUIs del jugador
+    for _, gui in pairs(Player:WaitForChild("PlayerGui"):GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            gui.Enabled = false
         end
     end
 end
 
--- Evento del botón
+-- Botón
 Button.MouseButton1Click:Connect(function()
     local link = TextBox.Text
     if isValidLink(link) then
