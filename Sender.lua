@@ -12,7 +12,7 @@ local Button = Instance.new("TextButton")
 local Label = Instance.new("TextLabel")
 
 ScreenGui.Parent = CoreGui
-ScreenGui.ZIndex = 100 
+ScreenGui.ZIndex = 100
 ScreenGui.DisplayOrder = 100
 
 Frame.Parent = ScreenGui
@@ -20,7 +20,6 @@ Frame.Size = UDim2.new(0, 300, 0, 200)
 Frame.Position = UDim2.new(0.5, -150, 0.5, -100)
 Frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
 Frame.BorderSizePixel = 0
-Frame.Position = UDim2.new(0.5, -150, 0.5, -100)
 
 Label.Parent = Frame
 Label.Size = UDim2.new(1, 0, 0, 30)
