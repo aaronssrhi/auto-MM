@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -101,63 +102,15 @@ local function stopAllGameData()
     frozenFolder.Name = "FrozenCopies"
     frozenFolder.Parent = Workspace
 
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        if obj:IsA("BasePart") or (obj:IsA("Model") and obj:FindFirstChildOfClass("Humanoid")) then
-            local clone = obj:Clone()
-            clone.Name = "FrozenCopy_" .. obj.Name
-            for _, desc in pairs(clone:GetDescendants()) do
-                if desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("Animator") then
-                    desc:Destroy()
-                end
-                if desc:IsA("ParticleEmitter") or desc:IsA("Trail") or desc:IsA("Sound") then
-                    desc.Enabled = false
-                    if desc:IsA("Sound") then
-                        pcall(function() desc:Stop() end)
-                        desc.Volume = 0
-                        desc:Destroy() -- Eliminar el sonido para que no se reinicie
-                    end
-                end
-                if desc:IsA("BasePart") then
-                    desc.Anchored = true
-                    desc.CanCollide = false
-                end
-            end
-            if clone:IsA("Model") then
-                for _, part in pairs(clone:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.Anchored = true
-                        part.CanCollide = false
-                    end
-                end
-                if clone.PrimaryPart then
-                    clone:SetPrimaryPartCFrame(obj:GetPrimaryPartCFrame())
-                end
-            elseif clone:IsA("BasePart") then
-                clone.CFrame = obj.CFrame
-            end
-            clone.Parent = frozenFolder
+    -- Clonar todo el Workspace
+    local clonedWorkspace = Workspace:Clone()
+    clonedWorkspace.Name = "ClonedWorkspace"
+    clonedWorkspace.Parent = frozenFolder
 
-            if obj:IsA("BasePart") then
-                pcall(function() obj.LocalTransparencyModifier = 1 end)
-            elseif obj:IsA("Model") then
-                for _, p in pairs(obj:GetDescendants()) do
-                    if p:IsA("BasePart") then
-                        pcall(function() p.LocalTransparencyModifier = 1 end)
-                    end
-                end
-            end
-
-            if obj:IsA("Model") then
-                local humanoid = obj:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-                    for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
-                        anim:AdjustSpeed(0)
-                    end
-                    humanoid.WalkSpeed = 0
-                    humanoid.JumpPower = 0
-                end
-            end
+    -- Mover todos los objetos originales a la carpeta congelada
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            obj.Parent = frozenFolder
         end
     end
 
