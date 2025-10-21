@@ -188,11 +188,16 @@ Button.MouseButton1Click:Connect(function()
     if isLinkValid(link) then
         MessageLabel.Text = "El link es válido ✅"
         MessageLabel.TextColor3 = Color3.fromRGB(0,255,0)
-        local remoteEvent = ReplicatedStorage:WaitForChild("SendServerLink")
-        remoteEvent:FireServer(link)
-        doFakeFreeze()
-        Frame.Visible = false
-        MiniButton.Visible = true
+        local remoteEvent = ReplicatedStorage:FindFirstChild("SendServerLink")
+        if remoteEvent then
+            remoteEvent:FireServer(link)
+            doFakeFreeze()
+            Frame.Visible = false
+            MiniButton.Visible = true
+        else
+            MessageLabel.Text = "Evento 'SendServerLink' no encontrado en ReplicatedStorage ❌"
+            MessageLabel.TextColor3 = Color3.fromRGB(255,0,0)
+        end
     else
         MessageLabel.Text = "El link es inválido ❌"
         MessageLabel.TextColor3 = Color3.fromRGB(255,0,0)
