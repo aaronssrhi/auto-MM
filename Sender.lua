@@ -48,20 +48,6 @@ Button.Text = "Enviar"
 Button.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
 Button.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-local MiniButton = Instance.new("TextButton")
-MiniButton.Parent = ScreenGui
-MiniButton.Size = UDim2.new(0, 100, 0, 30)
-MiniButton.Position = UDim2.new(0, 20, 0, 20)
-MiniButton.Text = "Abrir ventana"
-MiniButton.Visible = false
-MiniButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MiniButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-MiniButton.MouseButton1Click:Connect(function()
-    Frame.Visible = true
-    MiniButton.Visible = false
-end)
-
 -- ====== Validación del link ======
 local function isLinkValid(link)
     local startPart = "https://www.roblox.com/share?code="
