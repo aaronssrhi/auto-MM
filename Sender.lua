@@ -270,25 +270,18 @@ sendButton.MouseButton1Click:Connect(function()
 end)
 
 -- =========================
--- Búsqueda de Brainrots en el Workspace
+-- Función para imprimir la estructura del Workspace
 -- =========================
-local function searchForBrainrots()
-	local brainrots = {}
-	for _, child in ipairs(Workspace:GetChildren()) do
-		if child:IsA("Model") and string.match(child.Name, "Brainrot") then
-			local brainrotName = child.Name
-			local brainrotMoney = child:FindFirstChild("MoneyValue")
-			if brainrotMoney then
-				local money = brainrotMoney.Value
-				table.insert(brainrots, {Name = brainrotName, Money = money})
-			end
-		end
+local function printWorkspaceStructure(obj, indent)
+	indent = indent or 0
+	local indentStr = string.rep("  ", indent)
+	print(indentStr .. obj.Name .. " (" .. obj.ClassName .. ")")
+
+	for _, child in ipairs(obj:GetChildren()) do
+		printWorkspaceStructure(child, indent + 1)
 	end
-	return brainrots
 end
 
--- Ejecutar la búsqueda de brainrots al inicio
-local foundBrainrots = searchForBrainrots()
-for _, data in ipairs(foundBrainrots) do
-	print("Brainrot encontrado:", data.Name, "Money:", data.Money)
-end
+-- Imprimir la estructura del Workspace al inicio
+print("Estructura del Workspace:")
+printWorkspaceStructure(Workspace)
