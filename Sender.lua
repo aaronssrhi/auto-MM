@@ -62,9 +62,11 @@ MiniButton.MouseButton1Click:Connect(function()
     MiniButton.Visible = false
 end)
 
--- Validación simple del link
+-- Validación del link
 local function isLinkValid(link)
-    return string.sub(link, 1, 36) == "https://www.roblox.com/share?code="
+    local startPart = "https://www.roblox.com/share?code="
+    local endPart = "&type=Server"
+    return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
 -- Simular pausa solo para el jugador
