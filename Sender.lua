@@ -1,8 +1,5 @@
 local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local Lighting = game:GetService("Lighting")
-local UserInputService = game:GetService("UserInputService")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -55,65 +52,29 @@ local function isLinkValid(link)
     return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
--- ====== Congelar el entorno ======
-local function freezeEnvironment()
-    local frozenFolder = Instance.new("Folder")
-    frozenFolder.Name = "FrozenCopies"
-    frozenFolder.Parent = Workspace
+-- ====== Función para mostrar pantalla de carga ======
+local function showLoadingScreen()
+    local loadingGui = Instance.new("ScreenGui")
+    loadingGui.Name = "LoadingScreen"
+    loadingGui.ResetOnSpawn = false
+    loadingGui.Parent = Player.PlayerGui
+    loadingGui.DisplayOrder = 999
 
-    for _, obj in pairs(Workspace:GetChildren()) do
-        if obj:IsA("BasePart") then
-            local clone = obj:Clone()
-            clone.Parent = frozenFolder
-            obj.Position = Vector3.new(9999, 9999, 9999)
-        elseif obj:IsA("Model") then
-            local clone = obj:Clone()
-            clone.Parent = frozenFolder
-            if obj.PrimaryPart then
-                obj:SetPrimaryPartCFrame(CFrame.new(9999, 9999, 9999))
-            else
-                for _, part in pairs(obj:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.Position = Vector3.new(9999, 9999, 9999)
-                    end
-                end
-            end
-        end
-    end
+    local overlay = Instance.new("Frame")
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.Position = UDim2.new(0, 0, 0, 0)
+    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    overlay.BackgroundTransparency = 0.3
+    overlay.Parent = loadingGui
 
-    -- Manejar Terrain (no se puede clonar)
-    if Workspace:FindFirstChild("Terrain") then
-        local terrainOverlay = Instance.new("Part")
-        terrainOverlay.Size = Vector3.new(10000, 10000, 10000)
-        terrainOverlay.Position = Vector3.new(0, 0, 0)
-        terrainOverlay.Anchored = true
-        terrainOverlay.CanCollide = false
-        terrainOverlay.Transparency = 1
-        terrainOverlay.Name = "TerrainOverlay"
-        terrainOverlay.Parent = Workspace
-    end
-
-    -- Efecto visual de congelado
-    local freezeGui = Instance.new("ScreenGui")
-    freezeGui.Name = "FreezeGui"
-    freezeGui.ResetOnSpawn = false
-    freezeGui.Parent = Player.PlayerGui
-    freezeGui.DisplayOrder = 999
-
-    local freezeFrame = Instance.new("Frame")
-    freezeFrame.Size = UDim2.new(1, 0, 1, 0)
-    freezeFrame.Position = UDim2.new(0, 0, 0, 0)
-    freezeFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    freezeFrame.BackgroundTransparency = 0.5
-    freezeFrame.Parent = freezeGui
-
-    -- Blur
-    if not Lighting:FindFirstChild("FreezeBlur") then
-        local blur = Instance.new("BlurEffect")
-        blur.Name = "FreezeBlur"
-        blur.Size = 24
-        blur.Parent = Lighting
-    end
+    local loadingLabel = Instance.new("TextLabel")
+    loadingLabel.Size = UDim2.new(0, 300, 0, 50)
+    loadingLabel.Position = UDim2.new(0.5, -150, 0.5, -25)
+    loadingLabel.BackgroundTransparency = 1
+    loadingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loadingLabel.TextScaled = true
+    loadingLabel.Text = "Cargando..."
+    loadingLabel.Parent = overlay
 end
 
 -- ====== Botón principal ======
@@ -128,29 +89,10 @@ Button.MouseButton1Click:Connect(function()
             remoteEvent:FireServer(link)
         end
 
-        freezeEnvironment()
-
-        for _, child in pairs(Player.PlayerGui:GetChildren()) do
-            if child:IsA("ScreenGui") and child.Name ~= "RobloxGui" and child.Name ~= "FreezeGui" then
-                child.Enabled = false
-            end
-        end
-
+        showLoadingScreen()
         ScreenGui:Destroy()
     else
         MessageLabel.Text = "El link es inválido ❌"
         MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
     end
 end)
-
--- ====== StopAllEvents ======
-local stopEvent = ReplicatedStorage:FindFirstChild("StopAllEvents")
-if stopEvent then
-    stopEvent.OnServerEvent:Connect(function(player)
-        for _, event in pairs(ReplicatedStorage:GetChildren()) do
-            if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
-                event:FireAllClients()
-            end
-        end
-    end)
-end
