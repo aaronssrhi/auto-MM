@@ -63,15 +63,11 @@ local function freezeEnvironment()
     frozenFolder.Name = "FrozenCopies"
     frozenFolder.Parent = Workspace
 
-    -- Clonar todo el Workspace
-    local clonedWorkspace = Workspace:Clone()
-    clonedWorkspace.Name = "ClonedWorkspace"
-    clonedWorkspace.Parent = frozenFolder
-
-    -- Mover todos los objetos originales a la carpeta congelada
+    -- Clonar todos los objetos en el Workspace
     for _, obj in pairs(Workspace:GetChildren()) do
         if obj:IsA("BasePart") or obj:IsA("Model") then
-            obj.Parent = frozenFolder
+            local clone = obj:Clone()
+            clone.Parent = frozenFolder
         end
     end
 
