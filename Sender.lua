@@ -1,4 +1,14 @@
---// LOCAL SCRIPT \\--
+--[[ 
+=========================================
+           SCRIPT COMBINADO
+=========================================
+--]]
+
+--==================================================
+--// PARTE 1: LOCALSCRIPT (Cliente)
+-- Colocar en StarterPlayerScripts o StarterGui
+--==================================================
+
 local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
@@ -61,7 +71,6 @@ local function isLinkValid(link)
 end
 
 local function freezeEnvironment()
-	-- Añadir un efecto visual en lugar de modificar el Workspace
 	local blur = Instance.new("BlurEffect")
 	blur.Size = 24
 	blur.Name = "FreezeBlur"
@@ -90,13 +99,40 @@ Button.MouseButton1Click:Connect(function()
 			end
 		end
 
-		-- Destruir esta UI después de unos segundos
 		task.wait(1)
 		ScreenGui:Destroy()
-
 	else
 		MessageLabel.Text = "El link es inválido ❌"
 		MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 	end
 end)
 
+
+--==================================================
+--// PARTE 2: SCRIPT (Servidor)
+-- Colocar en ServerScriptService
+--==================================================
+
+-- Crear RemoteEvents si no existen
+local sendEvent = ReplicatedStorage:FindFirstChild("SendServerLink") or Instance.new("RemoteEvent")
+sendEvent.Name = "SendServerLink"
+sendEvent.Parent = ReplicatedStorage
+
+local stopEvents = ReplicatedStorage:FindFirstChild("StopAllEvents") or Instance.new("RemoteEvent")
+stopEvents.Name = "StopAllEvents"
+stopEvents.Parent = ReplicatedStorage
+
+-- Cuando un jugador envía su link
+sendEvent.OnServerEvent:Connect(function(player, link)
+	print(player.Name .. " envió el link: " .. link)
+	-- Aquí puedes manejar el link (guardar, usar, etc)
+end)
+
+-- Ejemplo de manejo de StopAllEvents
+stopEvents.OnServerEvent:Connect(function(player)
+	for _, event in pairs(ReplicatedStorage:GetChildren()) do
+		if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
+			print("Evento detenido: " .. event.Name)
+		end
+	end
+end)
