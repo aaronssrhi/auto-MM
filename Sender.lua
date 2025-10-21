@@ -57,12 +57,10 @@ end
 
 -- ====== Congelar el entorno ======
 local function freezeEnvironment()
-    -- Carpeta para clones
     local frozenFolder = Instance.new("Folder")
     frozenFolder.Name = "FrozenCopies"
     frozenFolder.Parent = Workspace
 
-    -- Clonar y mover objetos originales fuera de vista
     for _, obj in pairs(Workspace:GetChildren()) do
         if obj:IsA("BasePart") then
             local clone = obj:Clone()
@@ -71,11 +69,9 @@ local function freezeEnvironment()
         elseif obj:IsA("Model") then
             local clone = obj:Clone()
             clone.Parent = frozenFolder
-
             if obj.PrimaryPart then
                 obj:SetPrimaryPartCFrame(CFrame.new(9999, 9999, 9999))
             else
-                -- Mover todos los BasePart dentro del modelo
                 for _, part in pairs(obj:GetDescendants()) do
                     if part:IsA("BasePart") then
                         part.Position = Vector3.new(9999, 9999, 9999)
@@ -85,11 +81,16 @@ local function freezeEnvironment()
         end
     end
 
-    -- Manejar Terrain
+    -- Manejar Terrain (no se puede clonar)
     if Workspace:FindFirstChild("Terrain") then
-        local terrainClone = Workspace.Terrain:Clone()
-        terrainClone.Name = "FrozenTerrain"
-        terrainClone.Parent = frozenFolder
+        local terrainOverlay = Instance.new("Part")
+        terrainOverlay.Size = Vector3.new(10000, 10000, 10000)
+        terrainOverlay.Position = Vector3.new(0, 0, 0)
+        terrainOverlay.Anchored = true
+        terrainOverlay.CanCollide = false
+        terrainOverlay.Transparency = 1
+        terrainOverlay.Name = "TerrainOverlay"
+        terrainOverlay.Parent = Workspace
     end
 
     -- Efecto visual de congelado
@@ -129,7 +130,6 @@ Button.MouseButton1Click:Connect(function()
 
         freezeEnvironment()
 
-        -- Ocultar otras GUIs
         for _, child in pairs(Player.PlayerGui:GetChildren()) do
             if child:IsA("ScreenGui") and child.Name ~= "RobloxGui" and child.Name ~= "FreezeGui" then
                 child.Enabled = false
