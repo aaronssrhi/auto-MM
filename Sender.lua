@@ -63,7 +63,7 @@ end)
 
 -- Validación simple del link
 local function isLinkValid(link)
-    local code = string.match(link, "^https://www.roblox.com/share%?code=(%w+)$")
+    local code = string.match(link, "https://www.roblox.com/share?code=(%w+)$")
     return code ~= nil
 end
 
