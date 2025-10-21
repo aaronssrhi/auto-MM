@@ -4,7 +4,7 @@ local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
--- Crear UI
+-- UI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 ScreenGui.DisplayOrder = 100
@@ -62,33 +62,90 @@ MiniButton.MouseButton1Click:Connect(function()
     MiniButton.Visible = false
 end)
 
--- Validación del link
+-- Validación de link
 local function isLinkValid(link)
     local startPart = "https://www.roblox.com/share?code="
     local endPart = "&type=Server"
     return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
--- Simular pausa solo para el jugador
-local function simulateWorldPause()
+-- Falso frozen indefinido
+local function doFakeFreeze()
+    -- 1) Detener todo el sonido
     for _, sound in pairs(Workspace:GetDescendants()) do
         if sound:IsA("Sound") then
-            sound.Playing = false
+            pcall(function() sound:Stop() end)
+            sound.Volume = 0
         end
     end
-    for _, sound in pairs(SoundService:GetChildren()) do
+    for _, sound in pairs(SoundService:GetDescendants()) do
         if sound:IsA("Sound") then
-            sound.Playing = false
+            pcall(function() sound:Stop() end)
+            sound.Volume = 0
         end
     end
+
+    -- 2) Overlay visual
+    local overlayGui = Instance.new("ScreenGui")
+    overlayGui.Name = "LocalFreezeOverlay"
+    overlayGui.Parent = Player:WaitForChild("PlayerGui")
     local overlay = Instance.new("Frame")
-    overlay.Name = "FreezeOverlay"
-    overlay.Parent = Player:WaitForChild("PlayerGui")
-    overlay.Size = UDim2.new(1, 0, 1, 0)
-    overlay.BackgroundColor3 = Color3.new(0, 0, 0)
-    overlay.BackgroundTransparency = 0.5
-    local tween = TweenService:Create(overlay, TweenInfo.new(0.5), {BackgroundTransparency = 0.7})
-    tween:Play()
+    overlay.Size = UDim2.new(1,0,1,0)
+    overlay.BackgroundColor3 = Color3.new(0,0,0)
+    overlay.BackgroundTransparency = 0.45
+    overlay.ZIndex = 1000
+    overlay.Parent = overlayGui
+
+    local tw = TweenService:Create(overlay, TweenInfo.new(0.5), {BackgroundTransparency = 0.6})
+    tw:Play()
+
+    -- 3) Crear clones congelados
+    local frozenFolder = Instance.new("Folder")
+    frozenFolder.Name = "FrozenCopies"
+    frozenFolder.Parent = Workspace
+
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") or (obj:IsA("Model") and obj:FindFirstChildOfClass("Humanoid")) then
+            local clone = obj:Clone()
+            clone.Name = "FrozenCopy_"..obj.Name
+            -- Scripts y animators destruidos
+            for _, desc in pairs(clone:GetDescendants()) do
+                if desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("Animator") then
+                    desc:Destroy()
+                end
+                if desc:IsA("BasePart") then
+                    desc.Anchored = true
+                    desc.CanCollide = false
+                end
+            end
+            -- Para modelos de personajes
+            if clone:IsA("Model") then
+                for _, part in pairs(clone:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.Anchored = true
+                        part.CanCollide = false
+                    end
+                end
+                if clone.PrimaryPart then
+                    clone:SetPrimaryPartCFrame(obj:GetPrimaryPartCFrame())
+                end
+            elseif clone:IsA("BasePart") then
+                clone.CFrame = obj.CFrame
+            end
+            clone.Parent = frozenFolder
+
+            -- Ocultar originales solo para este jugador
+            if obj:IsA("BasePart") then
+                pcall(function() obj.LocalTransparencyModifier = 1 end)
+            elseif obj:IsA("Model") then
+                for _, p in pairs(obj:GetDescendants()) do
+                    if p:IsA("BasePart") then
+                        pcall(function() p.LocalTransparencyModifier = 1 end)
+                    end
+                end
+            end
+        end
+    end
 end
 
 -- Botón principal
@@ -99,7 +156,7 @@ Button.MouseButton1Click:Connect(function()
         MessageLabel.TextColor3 = Color3.new(0,1,0)
         local remoteEvent = ReplicatedStorage:WaitForChild("SendServerLink")
         remoteEvent:FireServer(link)
-        simulateWorldPause()
+        doFakeFreeze()
         Frame.Visible = false
         MiniButton.Visible = true
     else
@@ -107,4 +164,3 @@ Button.MouseButton1Click:Connect(function()
         MessageLabel.TextColor3 = Color3.new(1,0,0)
     end
 end)
-
