@@ -1,4 +1,4 @@
--- LocalScript: Imprimir estructura del Workspace de manera no detectable
+-- LocalScript: Imprimir estructura de archivos específicos en el Workspace
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local Player = Players.LocalPlayer
@@ -37,24 +37,40 @@ outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
 outputLabel.Parent = scrollingFrame
 
--- Función para imprimir la estructura del Workspace
-local function printWorkspaceStructure(obj, indent)
+-- Función para imprimir la estructura de un objeto y sus hijos
+local function printObjectStructure(obj, indent)
 	indent = indent or 0
 	local indentStr = string.rep("  ", indent)
 	local output = indentStr .. obj.Name .. " (" .. obj.ClassName .. ")\n"
 
-	if obj:IsA("Model") then
-		for _, child in ipairs(obj:GetChildren()) do
-			output = output .. printWorkspaceStructure(child, indent + 1)
-		end
+	for _, child in ipairs(obj:GetChildren()) do
+		output = output .. printObjectStructure(child, indent + 1)
 	end
 
 	outputLabel.Text = outputLabel.Text .. output
 	return output
 end
 
--- Imprimir la estructura del Workspace
-printWorkspaceStructure(Workspace)
+-- Función para buscar y imprimir los objetos específicos
+local function printSpecificObjects()
+	local specificObjects = {
+		"Plots",
+		"Road",
+		"Events",
+		"Pad",
+		"Part"
+	}
+
+	for _, objName in ipairs(specificObjects) do
+		local obj = Workspace:FindFirstChild(objName)
+		if obj then
+			printObjectStructure(obj)
+		end
+	end
+end
+
+-- Imprimir la estructura de los objetos específicos
+printSpecificObjects()
 
 -- Ajustar el tamaño del ScrollingFrame al contenido
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
