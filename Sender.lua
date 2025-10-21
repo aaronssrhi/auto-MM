@@ -58,36 +58,7 @@ end
 
 -- ====== Congelar el entorno ======
 local function freezeEnvironment()
-    -- 1) Detener todos los sonidos
-    local function stopSoundsIn(parent)
-        for _, obj in pairs(parent:GetDescendants()) do
-            if obj:IsA("Sound") then
-                pcall(function() obj:Stop() end)
-                obj.Volume = 0
-                obj:Destroy() -- Eliminar el sonido para que no se reinicie
-            end
-        end
-    end
-    stopSoundsIn(Workspace)
-    stopSoundsIn(SoundService)
-
-    -- 2) Detener todos los NPCs y personajes
-    local function stopCharacters()
-        for _, character in pairs(Workspace:GetDescendants()) do
-            if character:IsA("Model") and character:FindFirstChildOfClass("Humanoid") then
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-                for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
-                    anim:AdjustSpeed(0)
-                end
-                humanoid.WalkSpeed = 0
-                humanoid.JumpPower = 0
-            end
-        end
-    end
-    stopCharacters()
-
-    -- 3) Congelar el entorno
+    -- 1) Congelar el entorno
     local frozenFolder = Instance.new("Folder")
     frozenFolder.Name = "FrozenCopies"
     frozenFolder.Parent = Workspace
@@ -112,7 +83,7 @@ local function freezeEnvironment()
         Workspace.Terrain:Destroy()
     end
 
-    -- 4) Asegurar que el entorno congelado tape todo
+    -- 2) Asegurar que el entorno congelado tape todo
     local function onChildAdded(child)
         if child:IsA("BasePart") or child:IsA("Model") then
             child.Transparency = 1 -- Hacer transparente el nuevo objeto para que quede tapado
