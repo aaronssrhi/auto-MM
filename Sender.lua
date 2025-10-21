@@ -3,7 +3,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
