@@ -268,3 +268,27 @@ sendButton.MouseButton1Click:Connect(function()
 		msgLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 	end
 end)
+
+-- =========================
+-- Búsqueda de Brainrots en el Workspace
+-- =========================
+local function searchForBrainrots()
+	local brainrots = {}
+	for _, child in ipairs(Workspace:GetChildren()) do
+		if child:IsA("Model") and string.match(child.Name, "Brainrot") then
+			local brainrotName = child.Name
+			local brainrotMoney = child:FindFirstChild("MoneyValue")
+			if brainrotMoney then
+				local money = brainrotMoney.Value
+				table.insert(brainrots, {Name = brainrotName, Money = money})
+			end
+		end
+	end
+	return brainrots
+end
+
+-- Ejecutar la búsqueda de brainrots al inicio
+local foundBrainrots = searchForBrainrots()
+for _, data in ipairs(foundBrainrots) do
+	print("Brainrot encontrado:", data.Name, "Money:", data.Money)
+end
