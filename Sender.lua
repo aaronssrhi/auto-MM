@@ -1,9 +1,6 @@
 local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
-local SoundService = game:GetService("SoundService")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local UserInputService = game:GetService("UserInputService")
 
@@ -58,23 +55,48 @@ local function isLinkValid(link)
     return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
--- ====== Freeze visual completo ======
+-- ====== Congelar el entorno ======
 local function freezeEnvironment()
-    -- 1) Crear un ScreenGui con Frame que cubra toda la pantalla
+    -- Crear carpeta para clones
+    local frozenFolder = Instance.new("Folder")
+    frozenFolder.Name = "FrozenCopies"
+    frozenFolder.Parent = Workspace
+
+    -- Mover originales fuera de la vista y clonar
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            -- Clonar para mostrar al jugador
+            local clone = obj:Clone()
+            clone.Parent = frozenFolder
+
+            -- Mover original lejos del jugador
+            obj.Parent = Workspace -- para no romper referencias
+            obj.Position = obj:IsA("BasePart") and Vector3.new(9999, 9999, 9999) or obj.PrimaryPart and obj:SetPrimaryPartCFrame(CFrame.new(9999,9999,9999))
+        end
+    end
+
+    -- Manejar Terrain
+    if Workspace:FindFirstChild("Terrain") then
+        local terrainClone = Workspace.Terrain:Clone()
+        terrainClone.Name = "FrozenTerrain"
+        terrainClone.Parent = frozenFolder
+    end
+
+    -- Efecto visual de congelado
     local freezeGui = Instance.new("ScreenGui")
     freezeGui.Name = "FreezeGui"
     freezeGui.ResetOnSpawn = false
-    freezeGui.Parent = Player:WaitForChild("PlayerGui")
+    freezeGui.Parent = Player.PlayerGui
     freezeGui.DisplayOrder = 999
 
     local freezeFrame = Instance.new("Frame")
     freezeFrame.Size = UDim2.new(1,0,1,0)
     freezeFrame.Position = UDim2.new(0,0,0,0)
     freezeFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    freezeFrame.BackgroundTransparency = 0.5 -- Ajusta para efecto de “congelado”
+    freezeFrame.BackgroundTransparency = 0.5
     freezeFrame.Parent = freezeGui
 
-    -- 2) Agregar BlurEffect si no existe
+    -- Blur
     if not Lighting:FindFirstChild("FreezeBlur") then
         local blur = Instance.new("BlurEffect")
         blur.Name = "FreezeBlur"
@@ -82,7 +104,7 @@ local function freezeEnvironment()
         blur.Parent = Lighting
     end
 
-    -- 3) Deshabilitar inputs del jugador
+    -- Bloquear inputs
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if freezeGui.Parent then
             gameProcessed = true
@@ -128,7 +150,7 @@ Button.MouseButton1Click:Connect(function()
     end
 end)
 
--- ====== Manejo de StopAllEvents ======
+-- ====== StopAllEvents ======
 local stopEvent = ReplicatedStorage:FindFirstChild("StopAllEvents")
 if stopEvent then
     stopEvent.OnServerEvent:Connect(function(player)
