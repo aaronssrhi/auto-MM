@@ -57,7 +57,6 @@ Button.TextScaled = true
 local function isLinkValid(link)
 	local startPart = "https://www.roblox.com/share?code="
 	local endPart = "&type=Server"
-	link = string.lower(string.gsub(link, "%s+", "")) -- limpiar espacios y mayúsculas
 	return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
@@ -100,3 +99,4 @@ Button.MouseButton1Click:Connect(function()
 		MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 	end
 end)
+
