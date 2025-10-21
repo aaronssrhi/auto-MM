@@ -139,4 +139,3 @@ if stopEvent then
         end
     end)
 end
-
