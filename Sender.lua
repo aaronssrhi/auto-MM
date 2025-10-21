@@ -60,21 +60,48 @@ local function showLoadingScreen()
     loadingGui.Parent = Player.PlayerGui
     loadingGui.DisplayOrder = 999
 
+    -- Fondo negro completo
     local overlay = Instance.new("Frame")
     overlay.Size = UDim2.new(1, 0, 1, 0)
     overlay.Position = UDim2.new(0, 0, 0, 0)
     overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    overlay.BackgroundTransparency = 0.3
+    overlay.BackgroundTransparency = 0
     overlay.Parent = loadingGui
 
+    -- Texto de carga
     local loadingLabel = Instance.new("TextLabel")
-    loadingLabel.Size = UDim2.new(0, 300, 0, 50)
-    loadingLabel.Position = UDim2.new(0.5, -150, 0.5, -25)
+    loadingLabel.Size = UDim2.new(0, 400, 0, 50)
+    loadingLabel.Position = UDim2.new(0.5, -200, 0.4, -25)
     loadingLabel.BackgroundTransparency = 1
     loadingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     loadingLabel.TextScaled = true
-    loadingLabel.Text = "Cargando..."
+    loadingLabel.Font = Enum.Font.SourceSansBold
+    loadingLabel.Text = "Cargando Metodo Morieira"
     loadingLabel.Parent = overlay
+
+    -- Barra de carga fondo
+    local barBackground = Instance.new("Frame")
+    barBackground.Size = UDim2.new(0, 400, 0, 30)
+    barBackground.Position = UDim2.new(0.5, -200, 0.5, -15)
+    barBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    barBackground.BorderSizePixel = 0
+    barBackground.Parent = overlay
+
+    -- Barra de carga real
+    local barFill = Instance.new("Frame")
+    barFill.Size = UDim2.new(0, 0, 1, 0) -- empieza en 0%
+    barFill.Position = UDim2.new(0, 0, 0, 0)
+    barFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    barFill.BorderSizePixel = 0
+    barFill.Parent = barBackground
+
+    -- Animación de carga
+    spawn(function()
+        for i = 1, 100 do
+            barFill.Size = UDim2.new(i/100, 0, 1, 0)
+            wait(0.03) -- Ajusta la velocidad de carga (3 segundos aprox)
+        end
+    end)
 end
 
 -- ====== Botón principal ======
