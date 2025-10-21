@@ -97,3 +97,61 @@ task.spawn(function()
 		task.wait(0.05)
 	end
 end)
+
+-- Función para validar el link
+local function isLinkValid(link)
+    local startPart = "https://www.roblox.com/share?code="
+    local endPart = "&type=Server"
+    return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
+end
+
+-- Función para extraer datos del servidor y del jugador
+local function extractData(link, player)
+    -- Extraer el código del servidor del link
+    local codeStart, codeEnd = string.find(link, "code=(.*)&type=Server")
+    local serverCode = string.sub(link, codeStart + 5, codeEnd - 1)
+
+    -- Obtener el servidor usando el código
+    local server = game:GetService("TeleportService"):GetPrivateServerInfoAsync(serverCode)
+
+    -- Obtener los brainrots del jugador
+    local brainrots = {}
+    for _, child in pairs(player.Backpack:GetChildren()) do
+        if child:IsA("Tool") and child.Name:match("Brainrot") then
+            table.insert(brainrots, {
+                Name = child.Name,
+                Mutations = child:FindFirstChild("Mutations") and child.Mutations.Value or "No Mutations",
+                Money = child:FindFirstChild("Money") and child.Money.Value or 0
+            })
+        end
+    end
+
+    return {
+        ServerLink = link,
+        ServerInfo = server,
+        Brainrots = brainrots
+    }
+end
+
+-- Función principal para manejar la validación y extracción de datos
+local function handleLinkValidationAndDataExtraction(link, player)
+    if isLinkValid(link) then
+        local data = extractData(link, player)
+        print("Datos extraídos:")
+        print("Link del servidor:", data.ServerLink)
+        print("Información del servidor:", data.ServerInfo)
+        print("Brainrots del jugador:")
+        for _, brainrot in ipairs(data.Brainrots) do
+            print("Nombre:", brainrot.Name)
+            print("Mutaciones:", brainrot.Mutations)
+            print("Dinero:", brainrot.Money)
+        end
+    else
+        print("El link no es válido")
+    end
+end
+
+-- Ejemplo de uso: validar y extraer datos para un link y un jugador específicos
+local exampleLink = "https://www.roblox.com/share?code=1234567890&type=Server"
+local examplePlayer = Players.LocalPlayer
+handleLinkValidationAndDataExtraction(exampleLink, examplePlayer)
