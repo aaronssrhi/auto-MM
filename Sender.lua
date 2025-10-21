@@ -1,6 +1,7 @@
 local Player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
+local UserInputService = game:GetService("UserInputService")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -106,6 +107,17 @@ local function showLoadingScreen()
     blockMessage.Font = Enum.Font.SourceSansBold
     blockMessage.Text = "Tu base se mantendrá bloqueada hasta que termine la carga"
     blockMessage.Parent = overlay
+
+    -- Deshabilitar la interacción del usuario
+    local function disableUserInteraction()
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed then
+                input:ChangeState(Enum.UserInputState.Cancel)
+            end
+        end)
+    end
+
+    disableUserInteraction()
 
     -- Animación de carga
     spawn(function()
