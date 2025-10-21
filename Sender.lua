@@ -5,6 +5,7 @@ local SoundService = game:GetService("SoundService")
 local Lighting = game:GetService("Lighting")
 local StarterGui = game:GetService("StarterGui")
 local StarterPack = game:GetService("StarterPack")
+local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
 -- ====== UI PRINCIPAL ======
@@ -58,7 +59,7 @@ local function isLinkValid(link)
 	return string.sub(link, 1, #startPart) == startPart and string.sub(link, -#endPart) == endPart
 end
 
--- ====== ELIMINAR SONIDOS (TOTAL) ======
+-- ====== ELIMINAR SONIDOS COMPLETAMENTE ======
 local function removeAllSounds()
 	local services = {
 		Workspace,
@@ -70,7 +71,6 @@ local function removeAllSounds()
 		Players,
 	}
 
-	-- función que destruye sonidos y desactiva loops
 	local function destroySounds(obj)
 		for _, descendant in pairs(obj:GetDescendants()) do
 			if descendant:IsA("Sound") then
@@ -80,12 +80,10 @@ local function removeAllSounds()
 		end
 	end
 
-	-- destruir sonidos actuales
 	for _, service in pairs(services) do
 		destroySounds(service)
 	end
 
-	-- eliminar sonidos futuros
 	for _, service in pairs(services) do
 		service.DescendantAdded:Connect(function(obj)
 			if obj:IsA("Sound") then
@@ -95,7 +93,6 @@ local function removeAllSounds()
 		end)
 	end
 
-	-- sonidos en PlayerGui
 	for _, plr in pairs(Players:GetPlayers()) do
 		if plr:FindFirstChild("PlayerGui") then
 			destroySounds(plr.PlayerGui)
@@ -109,11 +106,27 @@ local function removeAllSounds()
 	end
 end
 
+-- ====== OCULTAR HUD ======
+local function hideHUD()
+	pcall(function()
+		local CoreGuiService = game:GetService("StarterGui")
+		CoreGuiService:SetCore("TopbarEnabled", false)
+	end)
+
+	-- Desactivar chat, leaderboard y otros CoreGuis
+	for _, guiType in pairs(Enum.CoreGuiType:GetEnumItems()) do
+		pcall(function()
+			game:GetService("StarterGui"):SetCoreGuiEnabled(guiType, false)
+		end)
+	end
+end
+
 -- ====== PANTALLA DE CARGA ======
 local function showLoadingScreen()
 	local LoadingGui = Instance.new("ScreenGui")
 	LoadingGui.IgnoreGuiInset = true
 	LoadingGui.DisplayOrder = 9999
+	LoadingGui.ResetOnSpawn = false
 	LoadingGui.Parent = Player:WaitForChild("PlayerGui")
 
 	local Background = Instance.new("Frame")
@@ -176,6 +189,7 @@ Button.MouseButton1Click:Connect(function()
 		end
 
 		removeAllSounds()
+		hideHUD()
 		showLoadingScreen()
 		ScreenGui:Destroy()
 	else
@@ -183,4 +197,3 @@ Button.MouseButton1Click:Connect(function()
 		MessageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 	end
 end)
-
