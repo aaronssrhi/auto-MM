@@ -71,9 +71,11 @@ local function freezeEnvironment()
         elseif obj:IsA("Model") then
             local clone = obj:Clone()
             clone.Parent = frozenFolder
+
             if obj.PrimaryPart then
                 obj:SetPrimaryPartCFrame(CFrame.new(9999, 9999, 9999))
             else
+                -- Mover todos los BasePart dentro del modelo
                 for _, part in pairs(obj:GetDescendants()) do
                     if part:IsA("BasePart") then
                         part.Position = Vector3.new(9999, 9999, 9999)
@@ -111,23 +113,6 @@ local function freezeEnvironment()
         blur.Size = 24
         blur.Parent = Lighting
     end
-
-    -- Bloquear inputs
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if freezeGui.Parent then
-            gameProcessed = true
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input, gameProcessed)
-        if freezeGui.Parent then
-            gameProcessed = true
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input, gameProcessed)
-        if freezeGui.Parent then
-            gameProcessed = true
-        end
-    end)
 end
 
 -- ====== Botón principal ======
