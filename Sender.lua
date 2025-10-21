@@ -12,7 +12,7 @@ local Button = Instance.new("TextButton")
 local Label = Instance.new("TextLabel")
 
 ScreenGui.Parent = CoreGui
-ScreenGui.zindex = 100 
+ScreenGui.ZINDEX = 100 
 ScreenGui.DisplayOrder = 100
 
 Frame.Parent = ScreenGui
