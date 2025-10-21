@@ -30,7 +30,7 @@ TextBox.Position = UDim2.new(0, 10, 0, 50)
 TextBox.TextColor3 = Color3.new(1, 1, 1)
 TextBox.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
 TextBox.ClearTextOnFocus = false
-TextBox.Text = "https://www.roblox.com/share?code=XXXXXXXX"
+TextBox.Text = "https://www.roblox.com/share?code="
 
 local MessageLabel = Instance.new("TextLabel")
 MessageLabel.Parent = Frame
@@ -64,9 +64,7 @@ end)
 
 -- Validación simple del link
 local function isLinkValid(link)
-    -- Verifica que empiece con https://www.roblox.com/share?code= y tenga código alfanumérico
-    local code = string.match(link, "^https://www.roblox.com/share%?code=([%w]+)$")
-    return code ~= nil
+    return string.sub(link, 1, 36) == "https://www.roblox.com/share?code="
 end
 
 -- Simular pausa solo para el jugador
@@ -107,3 +105,4 @@ Button.MouseButton1Click:Connect(function()
         MessageLabel.TextColor3 = Color3.new(1,0,0)
     end
 end)
+
