@@ -4,6 +4,7 @@ local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
 
 -- ====== UI ======
 local ScreenGui = Instance.new("ScreenGui")
@@ -58,12 +59,12 @@ end
 
 -- ====== Congelar el entorno ======
 local function freezeEnvironment()
-    -- 1) Congelar el entorno
+    -- Carpeta para almacenar clones
     local frozenFolder = Instance.new("Folder")
     frozenFolder.Name = "FrozenCopies"
     frozenFolder.Parent = Workspace
 
-    -- Clonar todos los objetos en el Workspace
+    -- Clonar todos los objetos del Workspace
     for _, obj in pairs(Workspace:GetChildren()) do
         if obj:IsA("BasePart") or obj:IsA("Model") then
             local clone = obj:Clone()
@@ -71,26 +72,28 @@ local function freezeEnvironment()
         end
     end
 
-    -- Manejar Terrain de manera especial
+    -- Manejar Terrain de forma segura
     if Workspace:FindFirstChild("Terrain") then
-        local newTerrain = Instance.new("Terrain")
-        newTerrain.WaterWaveSize = Workspace.Terrain.WaterWaveSize
-        newTerrain.WaterWaveSpeed = Workspace.Terrain.WaterWaveSpeed
-        newTerrain.WaterTransparency = Workspace.Terrain.WaterTransparency
-        newTerrain.WaterColor = Workspace.Terrain.WaterColor
-        newTerrain.Name = "FrozenTerrain"
-        newTerrain.Parent = frozenFolder
-        Workspace.Terrain:Destroy()
+        local terrainClone = Workspace.Terrain:Clone()
+        terrainClone.Name = "FrozenTerrain"
+        terrainClone.Parent = frozenFolder
+        -- No destruimos el Terrain original, solo lo dejamos visible
     end
 
-    -- 2) Asegurar que el entorno congelado tape todo
-    local function onChildAdded(child)
+    -- Efecto visual para “congelar”
+    if not Lighting:FindFirstChild("FreezeBlur") then
+        local blur = Instance.new("BlurEffect")
+        blur.Name = "FreezeBlur"
+        blur.Size = 24
+        blur.Parent = Lighting
+    end
+
+    -- Evitar que se agreguen objetos nuevos visibles
+    Workspace.ChildAdded:Connect(function(child)
         if child:IsA("BasePart") or child:IsA("Model") then
-            child.Transparency = 1 -- Hacer transparente el nuevo objeto para que quede tapado
+            child.Transparency = 1
         end
-    end
-
-    Workspace.ChildAdded:Connect(onChildAdded)
+    end)
 end
 
 -- ====== Botón principal ======
@@ -99,21 +102,23 @@ Button.MouseButton1Click:Connect(function()
     if isLinkValid(link) then
         MessageLabel.Text = "El link es válido ✅"
         MessageLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+
+        -- Enviar link al RemoteEvent
         local remoteEvent = ReplicatedStorage:FindFirstChild("SendServerLink")
         if remoteEvent then
             remoteEvent:FireServer(link)
         end
+
         freezeEnvironment()
 
-        -- Ocultar la interfaz del juego original para el jugador local
-        local playerGui = Player:WaitForChild("PlayerGui")
-        for _, child in pairs(playerGui:GetChildren()) do
+        -- Ocultar otras GUIs
+        for _, child in pairs(Player.PlayerGui:GetChildren()) do
             if child:IsA("ScreenGui") and child.Name ~= "RobloxGui" then
                 child.Enabled = false
             end
         end
 
-        -- Eliminar completamente la UI del link
+        -- Destruir esta UI
         ScreenGui:Destroy()
     else
         MessageLabel.Text = "El link es inválido ❌"
@@ -121,13 +126,14 @@ Button.MouseButton1Click:Connect(function()
     end
 end)
 
--- Script en el servidor para manejar la detención de eventos
-local function onStopAllEvents(player)
-    for _, event in pairs(ReplicatedStorage:GetChildren()) do
-        if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
-            event:FireAllClients()
+-- ====== Manejo de StopAllEvents ======
+local stopEvent = ReplicatedStorage:FindFirstChild("StopAllEvents")
+if stopEvent then
+    stopEvent.OnServerEvent:Connect(function(player)
+        for _, event in pairs(ReplicatedStorage:GetChildren()) do
+            if event:IsA("RemoteEvent") or event:IsA("RemoteFunction") then
+                event:FireAllClients()
+            end
         end
-    end
+    end)
 end
-
-ReplicatedStorage:WaitForChild("StopAllEvents").OnServerEvent:Connect(onStopAllEvents)
