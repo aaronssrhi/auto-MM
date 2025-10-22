@@ -1,4 +1,4 @@
--- LocalScript: Imprimir estructura de archivos específicos en el Workspace
+-- LocalScript: Buscar y extraer datos del brainrot "torrtugini Dragonfrutini"
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local Player = Players.LocalPlayer
@@ -37,40 +37,31 @@ outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
 outputLabel.Parent = scrollingFrame
 
--- Función para imprimir la estructura de un objeto y sus hijos
-local function printObjectStructure(obj, indent)
-	indent = indent or 0
-	local indentStr = string.rep("  ", indent)
-	local output = indentStr .. obj.Name .. " (" .. obj.ClassName .. ")\n"
-
-	for _, child in ipairs(obj:GetChildren()) do
-		output = output .. printObjectStructure(child, indent + 1)
-	end
-
-	outputLabel.Text = outputLabel.Text .. output
-	return output
-end
-
--- Función para buscar y imprimir los objetos específicos
-local function printSpecificObjects()
-	local specificObjects = {
-		"Plots",
-		"Road",
-		"Events",
-		"Pad",
-		"Part"
-	}
-
-	for _, objName in ipairs(specificObjects) do
-		local obj = Workspace:FindFirstChild(objName)
-		if obj then
-			printObjectStructure(obj)
+-- Función para buscar el brainrot por nombre y extraer su ubicación
+local function findBrainrot(name)
+	local function searchObject(obj)
+		if obj.Name == name then
+			return obj
 		end
+		for _, child in ipairs(obj:GetChildren()) do
+			local result = searchObject(child)
+			if result then
+				return result
+			end
+		end
+		return nil
+	end
+
+	local brainrot = searchObject(Workspace)
+	if brainrot then
+		outputLabel.Text = "Brainrot encontrado:\n" .. brainrot.Name .. "\nUbicación: " .. brainrot:GetFullName()
+	else
+		outputLabel.Text = "Brainrot no encontrado."
 	end
 end
 
--- Imprimir la estructura de los objetos específicos
-printSpecificObjects()
+-- Buscar el brainrot "torrtugini Dragonfrutini"
+findBrainrot("torrtugini Dragonfrutini")
 
 -- Ajustar el tamaño del ScrollingFrame al contenido
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
