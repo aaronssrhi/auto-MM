@@ -1,5 +1,6 @@
--- LocalScript: Buscar brainrot "torrtugini Dragonfrutini" en la información del usuario
+-- LocalScript: Buscar brainrot "torrtugini Dragonfrutini" en toda la data del juego
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
@@ -36,40 +37,51 @@ outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
 outputLabel.Parent = scrollingFrame
 
--- Función para buscar el brainrot por nombre y categoría en la información del usuario
-local function findBrainrotInUserData(name, category)
-	local function searchInUserData(data)
-		if typeof(data) == "table" then
-			for key, value in pairs(data) do
-				if key == name and value.Category == category then
-					return value
-				end
-				local result = searchInUserData(value)
-				if result then
-					return result
-				end
+-- Función para buscar el brainrot por nombre y categoría en cualquier lugar del juego
+local function findBrainrot(name, category)
+	local function searchInObject(obj)
+		if obj.Name == name and obj:FindFirstChild("Category") and obj.Category.Value == category then
+			return obj
+		end
+		for _, child in ipairs(obj:GetChildren()) do
+			local result = searchInObject(child)
+			if result then
+				return result
 			end
 		end
 		return nil
 	end
 
-	-- Acceder a la información del usuario (esto puede variar dependiendo del juego)
-	local userData = Player:FindFirstChild("PlayerData") or Player:FindFirstChild("Data") or Player:FindFirstChild("UserData")
-
-	if userData then
-		local brainrotData = searchInUserData(userData)
-		if brainrotData then
-			outputLabel.Text = "Brainrot encontrado:\n" .. name .. "\nCategoría: " .. category .. "\nDatos: " .. tostring(brainrotData)
-		else
-			outputLabel.Text = "Brainrot no encontrado en la información del usuario."
-		end
-	else
-		outputLabel.Text = "No se encontró la información del usuario."
+	-- Buscar en el Workspace
+	local brainrotInWorkspace = searchInObject(Workspace)
+	if brainrotInWorkspace then
+		outputLabel.Text = "Brainrot encontrado en Workspace:\n" .. brainrotInWorkspace:GetFullName()
+		return
 	end
+
+	-- Buscar en la información del jugador
+	local userData = Player:FindFirstChild("PlayerData") or Player:FindFirstChild("Data") or Player:FindFirstChild("UserData")
+	if userData then
+		local brainrotInUserData = searchInObject(userData)
+		if brainrotInUserData then
+			outputLabel.Text = "Brainrot encontrado en la información del jugador:\n" .. brainrotInUserData:GetFullName()
+			return
+		end
+	end
+
+	-- Buscar en otros lugares del juego (puedes agregar más servicios o lugares según sea necesario)
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local brainrotInReplicatedStorage = searchInObject(ReplicatedStorage)
+	if brainrotInReplicatedStorage then
+		outputLabel.Text = "Brainrot encontrado en ReplicatedStorage:\n" .. brainrotInReplicatedStorage:GetFullName()
+		return
+	end
+
+	outputLabel.Text = "Brainrot no encontrado en ningún lugar del juego."
 end
 
--- Buscar el brainrot "torrtugini Dragonfrutini" en la información del usuario
-findBrainrotInUserData("torrtugini Dragonfrutini", "Secret")
+-- Buscar el brainrot "torrtugini Dragonfrutini" en toda la data del juego
+findBrainrot("torrtugini Dragonfrutini", "Secret")
 
 -- Ajustar el tamaño del ScrollingFrame al contenido
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
