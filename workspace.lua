@@ -1,6 +1,5 @@
--- LocalScript: Explotar vulnerabilidades para acceder a datos de brainrot
+-- LocalScript: Manipular datos del jugador para encontrar brainrot
 local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
@@ -37,8 +36,8 @@ outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
 outputLabel.Parent = scrollingFrame
 
--- Función para explotar vulnerabilidades y acceder a datos protegidos
-local function exploitBrainrotData()
+-- Función para manipular datos del jugador y buscar brainrot
+local function manipulatePlayerData()
 	local function searchInObject(obj)
 		if obj:IsA("Model") or obj:IsA("Folder") then
 			for _, child in ipairs(obj:GetChildren()) do
@@ -54,13 +53,6 @@ local function exploitBrainrotData()
 		return nil
 	end
 
-	-- Buscar en el Workspace
-	local brainrotInWorkspace = searchInObject(Workspace)
-	if brainrotInWorkspace then
-		outputLabel.Text = "Brainrot encontrado en Workspace:\n" .. brainrotInWorkspace:GetFullName()
-		return
-	end
-
 	-- Buscar en la información del jugador
 	local userData = Player:FindFirstChild("PlayerData") or Player:FindFirstChild("Data") or Player:FindFirstChild("UserData")
 	if userData then
@@ -72,16 +64,26 @@ local function exploitBrainrotData()
 	end
 
 	-- Buscar en ReplicatedStorage
-	local brainrotInReplicatedStorage = searchInObject(game:GetService("ReplicatedStorage"))
+	local replicatedStorage = game:GetService("ReplicatedStorage")
+	local brainrotInReplicatedStorage = searchInObject(replicatedStorage)
 	if brainrotInReplicatedStorage then
 		outputLabel.Text = "Brainrot encontrado en ReplicatedStorage:\n" .. brainrotInReplicatedStorage:GetFullName()
 		return
 	end
 
 	-- Buscar en ServerStorage
-	local brainrotInServerStorage = searchInObject(game:GetService("ServerStorage"))
+	local serverStorage = game:GetService("ServerStorage")
+	local brainrotInServerStorage = searchInObject(serverStorage)
 	if brainrotInServerStorage then
 		outputLabel.Text = "Brainrot encontrado en ServerStorage:\n" .. brainrotInServerStorage:GetFullName()
+		return
+	end
+
+	-- Buscar en el Workspace
+	local workspace = game:GetService("Workspace")
+	local brainrotInWorkspace = searchInObject(workspace)
+	if brainrotInWorkspace then
+		outputLabel.Text = "Brainrot encontrado en Workspace:\n" .. brainrotInWorkspace:GetFullName()
 		return
 	end
 
@@ -105,8 +107,8 @@ local function exploitBrainrotData()
 	outputLabel.Text = "Brainrot no encontrado en ningún lugar del juego."
 end
 
--- Explotar vulnerabilidades y acceder a datos de brainrot
-exploitBrainrotData()
+-- Manipular datos del jugador y buscar brainrot
+manipulatePlayerData()
 
 -- Ajustar el tamaño del ScrollingFrame al contenido
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
