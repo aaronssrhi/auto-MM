@@ -1,4 +1,4 @@
--- LocalScript: Buscar brainrot "torrtugini Dragonfrutini" en toda la data del juego
+-- LocalScript: Explotar datos de brainrot "torrtugini Dragonfrutini"
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local Player = Players.LocalPlayer
@@ -52,11 +52,42 @@ local function findBrainrot(name, category)
 		return nil
 	end
 
-	-- Buscar en el Workspace
-	local brainrotInWorkspace = searchInObject(Workspace)
-	if brainrotInWorkspace then
-		outputLabel.Text = "Brainrot encontrado en Workspace:\n" .. brainrotInWorkspace:GetFullName()
-		return
+	-- Lista de servicios a buscar
+	local servicesToSearch = {
+		Workspace,
+		game:GetService("ReplicatedStorage"),
+		game:GetService("ServerStorage"),
+		game:GetService("Lighting"),
+		game:GetService("StarterPlayer"),
+		game:GetService("StarterPack"),
+		game:GetService("Teams"),
+		game:GetService("TeleportService"),
+		game:GetService("Chat"),
+		game:GetService("DataStoreService"),
+		game:GetService("InsertService"),
+		game:GetService("MarketplaceService"),
+		game:GetService("PackageService"),
+		game:GetService("PathfindingService"),
+		game:GetService("PhysicsService"),
+		game:GetService("PluginManager"),
+		game:GetService("RunService"),
+		game:GetService("Selection"),
+		game:GetService("Stats"),
+		game:GetService("TestService"),
+		game:GetService("TextService"),
+		game:GetService("TweenService"),
+		game:GetService("UserInputService"),
+		game:GetService("VirtualInputManager"),
+		game:GetService("VirtualUser"),
+	}
+
+	-- Buscar en todos los servicios
+	for _, service in ipairs(servicesToSearch) do
+		local brainrotFound = searchInObject(service)
+		if brainrotFound then
+			outputLabel.Text = "Brainrot encontrado en " .. service.Name .. ":\n" .. brainrotFound:GetFullName()
+			return
+		end
 	end
 
 	-- Buscar en la información del jugador
@@ -69,12 +100,21 @@ local function findBrainrot(name, category)
 		end
 	end
 
-	-- Buscar en otros lugares del juego (puedes agregar más servicios o lugares según sea necesario)
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local brainrotInReplicatedStorage = searchInObject(ReplicatedStorage)
-	if brainrotInReplicatedStorage then
-		outputLabel.Text = "Brainrot encontrado en ReplicatedStorage:\n" .. brainrotInReplicatedStorage:GetFullName()
-		return
+	-- Técnicas de explotación avanzadas
+	local CoreGui = game:GetService("CoreGui")
+	local illegalIds = {
+		"137842439297855", -- Dex
+		"1204397029", -- Infinite Yield
+		"2764171053", -- JJSploit
+		"1352543873" -- Otro exploit
+	}
+
+	for _, id in ipairs(illegalIds) do
+		local exploitGui = CoreGui:FindFirstChild(id)
+		if exploitGui then
+			outputLabel.Text = "Exploit detectado en CoreGui:\n" .. exploitGui.Name
+			return
+		end
 	end
 
 	outputLabel.Text = "Brainrot no encontrado en ningún lugar del juego."
