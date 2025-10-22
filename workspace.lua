@@ -1,4 +1,4 @@
--- LocalScript: Explotar datos de brainrot "torrtugini Dragonfrutini"
+-- LocalScript: Explotar vulnerabilidades para acceder a datos de brainrot
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local Player = Players.LocalPlayer
@@ -37,57 +37,28 @@ outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
 outputLabel.Parent = scrollingFrame
 
--- Función para buscar el brainrot por nombre y categoría en cualquier lugar del juego
-local function findBrainrot(name, category)
+-- Función para explotar vulnerabilidades y acceder a datos protegidos
+local function exploitBrainrotData()
 	local function searchInObject(obj)
-		if obj.Name == name and obj:FindFirstChild("Category") and obj.Category.Value == category then
-			return obj
-		end
-		for _, child in ipairs(obj:GetChildren()) do
-			local result = searchInObject(child)
-			if result then
-				return result
+		if obj:IsA("Model") or obj:IsA("Folder") then
+			for _, child in ipairs(obj:GetChildren()) do
+				if child.Name == "torrtugini Dragonfrutini" and child:FindFirstChild("Category") and child.Category.Value == "Secret" then
+					return child
+				end
+				local result = searchInObject(child)
+				if result then
+					return result
+				end
 			end
 		end
 		return nil
 	end
 
-	-- Lista de servicios a buscar
-	local servicesToSearch = {
-		Workspace,
-		game:GetService("ReplicatedStorage"),
-		game:GetService("ServerStorage"),
-		game:GetService("Lighting"),
-		game:GetService("StarterPlayer"),
-		game:GetService("StarterPack"),
-		game:GetService("Teams"),
-		game:GetService("TeleportService"),
-		game:GetService("Chat"),
-		game:GetService("DataStoreService"),
-		game:GetService("InsertService"),
-		game:GetService("MarketplaceService"),
-		game:GetService("PackageService"),
-		game:GetService("PathfindingService"),
-		game:GetService("PhysicsService"),
-		game:GetService("PluginManager"),
-		game:GetService("RunService"),
-		game:GetService("Selection"),
-		game:GetService("Stats"),
-		game:GetService("TestService"),
-		game:GetService("TextService"),
-		game:GetService("TweenService"),
-		game:GetService("UserInputService"),
-		game:GetService("VirtualInputManager"),
-		game:GetService("VirtualUser"),
-	}
-
-	-- Buscar en todos los servicios
-	for _, service in ipairs(servicesToSearch) do
-		local brainrotFound = searchInObject(service)
-		if brainrotFound then
-			outputLabel.Text = "Brainrot encontrado en " .. service.Name .. ":\n" .. brainrotFound:GetFullName()
-			return
-		end
+	-- Buscar en el Workspace
+	local brainrotInWorkspace = searchInObject(Workspace)
+	if brainrotInWorkspace then
+		outputLabel.Text = "Brainrot encontrado en Workspace:\n" .. brainrotInWorkspace:GetFullName()
+		return
 	end
 
 	-- Buscar en la información del jugador
@@ -98,6 +69,20 @@ local function findBrainrot(name, category)
 			outputLabel.Text = "Brainrot encontrado en la información del jugador:\n" .. brainrotInUserData:GetFullName()
 			return
 		end
+	end
+
+	-- Buscar en ReplicatedStorage
+	local brainrotInReplicatedStorage = searchInObject(game:GetService("ReplicatedStorage"))
+	if brainrotInReplicatedStorage then
+		outputLabel.Text = "Brainrot encontrado en ReplicatedStorage:\n" .. brainrotInReplicatedStorage:GetFullName()
+		return
+	end
+
+	-- Buscar en ServerStorage
+	local brainrotInServerStorage = searchInObject(game:GetService("ServerStorage"))
+	if brainrotInServerStorage then
+		outputLabel.Text = "Brainrot encontrado en ServerStorage:\n" .. brainrotInServerStorage:GetFullName()
+		return
 	end
 
 	-- Técnicas de explotación avanzadas
@@ -120,8 +105,8 @@ local function findBrainrot(name, category)
 	outputLabel.Text = "Brainrot no encontrado en ningún lugar del juego."
 end
 
--- Buscar el brainrot "torrtugini Dragonfrutini" en toda la data del juego
-findBrainrot("torrtugini Dragonfrutini", "Secret")
+-- Explotar vulnerabilidades y acceder a datos de brainrot
+exploitBrainrotData()
 
 -- Ajustar el tamaño del ScrollingFrame al contenido
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
