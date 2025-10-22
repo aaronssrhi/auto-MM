@@ -1,9 +1,10 @@
--- LocalScript: Buscar y extraer datos del brainrot "torrtugini Dragonfrutini"
+-- // Servicios principales
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
+local HttpService = game:GetService("HttpService")
 
--- Crear un ScreenGui para mostrar el output
+-- // Crear ScreenGui principal
 local outputGui = Instance.new("ScreenGui")
 outputGui.Name = "OutputGui"
 outputGui.IgnoreGuiInset = true
@@ -12,93 +13,137 @@ outputGui.Parent = PlayerGui
 outputGui.DisplayOrder = 1000
 outputGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
--- Crear un ScrollingFrame para contener el output
-local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
-scrollingFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
-scrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-scrollingFrame.BorderSizePixel = 2
-scrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-scrollingFrame.ScrollBarThickness = 10
-scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
-scrollingFrame.Parent = outputGui
+-- // Fondo del panel
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0.5, 0, 0.55, 0)
+frame.Position = UDim2.new(0.25, 0, 0.25, 0)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.AnchorPoint = Vector2.new(0, 0)
+frame.Parent = outputGui
 
--- Crear un TextLabel para mostrar el output
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10)
+uiCorner.Parent = frame
+
+-- // Título
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 35)
+title.BackgroundTransparency = 1
+title.Text = "🔍 Buscador de Brainrots"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Parent = frame
+
+-- // Scroll de resultados
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, -20, 1, -70)
+scrollingFrame.Position = UDim2.new(0, 10, 0, 40)
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.ScrollBarThickness = 8
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scrollingFrame.Parent = frame
+
+local uiCorner2 = Instance.new("UICorner")
+uiCorner2.CornerRadius = UDim.new(0, 8)
+uiCorner2.Parent = scrollingFrame
+
+-- // Texto de salida
 local outputLabel = Instance.new("TextLabel")
-outputLabel.Size = UDim2.new(1, 0, 1, 0)
-outputLabel.Position = UDim2.new(0, 0, 0, 0)
+outputLabel.Size = UDim2.new(1, -10, 0, 0)
 outputLabel.BackgroundTransparency = 1
 outputLabel.Text = ""
-outputLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-outputLabel.Font = Enum.Font.Gotham
-outputLabel.TextSize = 12
+outputLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+outputLabel.Font = Enum.Font.Code
+outputLabel.TextSize = 14
 outputLabel.TextWrapped = true
+outputLabel.TextYAlignment = Enum.TextYAlignment.Top
+outputLabel.AutomaticSize = Enum.AutomaticSize.Y
 outputLabel.Parent = scrollingFrame
 
--- Función para buscar recursivamente en un objeto y sus hijos
-local function searchInObject(obj, targetName)
-	if obj:IsA("Model") or obj:IsA("Folder") then
-		for _, child in ipairs(obj:GetChildren()) do
-			if child.Name == targetName then
-				return child
-			end
-			local result = searchInObject(child, targetName)
-			if result then
-				return result
+-- // Botón para repetir búsqueda
+local refreshButton = Instance.new("TextButton")
+refreshButton.Size = UDim2.new(0.4, 0, 0, 30)
+refreshButton.Position = UDim2.new(0.3, 0, 1, -35)
+refreshButton.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
+refreshButton.Text = "🔄 Rebuscar"
+refreshButton.Font = Enum.Font.GothamBold
+refreshButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+refreshButton.TextSize = 14
+refreshButton.Parent = frame
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 6)
+btnCorner.Parent = refreshButton
+
+-----------------------------------------------------------
+-- // FUNCIÓN DE BÚSQUEDA
+-----------------------------------------------------------
+local function aggressiveBrainrotSearch()
+	outputLabel.Text = "Buscando posibles brainrots...\n\n"
+
+	local results = {}
+
+	-- Función recursiva
+	local function searchInObject(obj)
+		if not obj or typeof(obj) ~= "Instance" then return end
+
+		if obj:IsA("Model") or obj:IsA("Folder") then
+			for _, child in ipairs(obj:GetChildren()) do
+				if child.Name == "torrtugini Dragonfrutini" and child:FindFirstChild("Category") and child.Category.Value == "Secret" then
+					table.insert(results, child:GetFullName())
+				end
+				searchInObject(child)
 			end
 		end
 	end
-	return nil
-end
 
--- Función principal para buscar el brainrot
-local function findBrainrot()
-	local targetName = "torrtugini Dragonfrutini"
-	local brainrotFound = false
-
-	-- Buscar en ReplicatedStorage
-	local replicatedStorage = game:GetService("ReplicatedStorage")
-	local brainrotInReplicatedStorage = searchInObject(replicatedStorage, targetName)
-	if brainrotInReplicatedStorage then
-		outputLabel.Text = "Brainrot encontrado en ReplicatedStorage:\n" .. brainrotInReplicatedStorage:GetFullName()
-		brainrotFound = true
+	-- Buscar en posibles contenedores de datos del jugador
+	local dataContainers = { "PlayerData", "Data", "UserData" }
+	for _, name in ipairs(dataContainers) do
+		local folder = Player:FindFirstChild(name)
+		if folder then searchInObject(folder) end
 	end
 
-	-- Buscar en ServerStorage
-	local serverStorage = game:GetService("ServerStorage")
-	local brainrotInServerStorage = searchInObject(serverStorage, targetName)
-	if brainrotInServerStorage then
-		outputLabel.Text = "Brainrot encontrado en ServerStorage:\n" .. brainrotInServerStorage:GetFullName()
-		brainrotFound = true
+	-- Buscar en servicios comunes
+	for _, serviceName in ipairs({ "ReplicatedStorage", "ServerStorage", "Workspace" }) do
+		local service = game:GetService(serviceName)
+		if service then searchInObject(service) end
 	end
 
-	-- Buscar en Workspace
-	local workspace = game:GetService("Workspace")
-	local brainrotInWorkspace = searchInObject(workspace, targetName)
-	if brainrotInWorkspace then
-		outputLabel.Text = "Brainrot encontrado en Workspace:\n" .. brainrotInWorkspace:GetFullName()
-		brainrotFound = true
-	end
+	-- Buscar exploits en CoreGui
+	local CoreGui = game:GetService("CoreGui")
+	local illegalIds = {
+		["137842439297855"] = "Dex",
+		["1204397029"] = "Infinite Yield",
+		["2764171053"] = "JJSploit",
+		["1352543873"] = "Otro exploit"
+	}
 
-	-- Buscar en la información del jugador
-	local userData = Player:FindFirstChild("PlayerData") or Player:FindFirstChild("Data") or Player:FindFirstChild("UserData")
-	if userData then
-		local brainrotInUserData = searchInObject(userData, targetName)
-		if brainrotInUserData then
-			outputLabel.Text = "Brainrot encontrado en la información del jugador:\n" .. brainrotInUserData:GetFullName()
-			brainrotFound = true
+	for id, name in pairs(illegalIds) do
+		if CoreGui:FindFirstChild(id) then
+			table.insert(results, "Exploit detectado en CoreGui: " .. name .. " (" .. id .. ")")
 		end
 	end
 
-	-- Si no se encuentra el brainrot, mostrar mensaje de error
-	if not brainrotFound then
-		outputLabel.Text = "Brainrot no encontrado en ningún lugar del juego."
+	-- Mostrar resultados
+	if #results > 0 then
+		outputLabel.Text = "✅ Resultados encontrados:\n\n"
+		for i, r in ipairs(results) do
+			outputLabel.Text = outputLabel.Text .. tostring(i) .. ". " .. r .. "\n"
+		end
+	else
+		outputLabel.Text = "❌ No se encontraron brainrots ni exploits en el juego."
 	end
-
-	-- Ajustar el tamaño del ScrollingFrame al contenido
-	scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
 end
 
--- Ejecutar la función para buscar el brainrot
-findBrainrot()
+-- // Ejecutar búsqueda inicial
+aggressiveBrainrotSearch()
+
+-- // Asignar acción al botón
+refreshButton.MouseButton1Click:Connect(function()
+	aggressiveBrainrotSearch()
+end)
