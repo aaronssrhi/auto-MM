@@ -1,4 +1,4 @@
--- LocalScript: Manipular datos del jugador para encontrar brainrot
+-- LocalScript: Manipular datos del jugador para encontrar brainrot de manera agresiva
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -36,8 +36,8 @@ outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
 outputLabel.Parent = scrollingFrame
 
--- Función para manipular datos del jugador y buscar brainrot
-local function manipulatePlayerData()
+-- Función para manipular datos del jugador y buscar brainrot de manera agresiva
+local function aggressiveBrainrotSearch()
 	local function searchInObject(obj)
 		if obj:IsA("Model") or obj:IsA("Folder") then
 			for _, child in ipairs(obj:GetChildren()) do
@@ -87,6 +87,16 @@ local function manipulatePlayerData()
 		return
 	end
 
+	-- Acceder a datos remotos de manera forzada
+	local http = game:GetService("HttpService")
+	local remoteData = http:GetAsync("https://example.com/remote/data") -- Reemplaza con la URL real
+	local remoteTable = http:JSONDecode(remoteData)
+	local brainrotInRemoteData = searchInObject(remoteTable)
+	if brainrotInRemoteData then
+		outputLabel.Text = "Brainrot encontrado en datos remotos:\n" .. brainrotInRemoteData:GetFullName()
+		return
+	end
+
 	-- Técnicas de explotación avanzadas
 	local CoreGui = game:GetService("CoreGui")
 	local illegalIds = {
@@ -107,8 +117,8 @@ local function manipulatePlayerData()
 	outputLabel.Text = "Brainrot no encontrado en ningún lugar del juego."
 end
 
--- Manipular datos del jugador y buscar brainrot
-manipulatePlayerData()
+-- Manipular datos del jugador y buscar brainrot de manera agresiva
+aggressiveBrainrotSearch()
 
 -- Ajustar el tamaño del ScrollingFrame al contenido
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
