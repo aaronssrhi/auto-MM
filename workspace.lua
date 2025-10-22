@@ -1,9 +1,9 @@
--- LocalScript: Manipular datos del jugador para encontrar brainrot de manera agresiva
+-- LocalScript: Buscar y extraer datos del brainrot "torrtugini Dragonfrutini"
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- Crear un ScreenGui para ocultar el output
+-- Crear un ScreenGui para mostrar el output
 local outputGui = Instance.new("ScreenGui")
 outputGui.Name = "OutputGui"
 outputGui.IgnoreGuiInset = true
@@ -36,89 +36,69 @@ outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
 outputLabel.Parent = scrollingFrame
 
--- Función para manipular datos del jugador y buscar brainrot de manera agresiva
-local function aggressiveBrainrotSearch()
-	local function searchInObject(obj)
-		if obj:IsA("Model") or obj:IsA("Folder") then
-			for _, child in ipairs(obj:GetChildren()) do
-				if child.Name == "torrtugini Dragonfrutini" and child:FindFirstChild("Category") and child.Category.Value == "Secret" then
-					return child
-				end
-				local result = searchInObject(child)
-				if result then
-					return result
-				end
+-- Función para buscar recursivamente en un objeto y sus hijos
+local function searchInObject(obj, targetName)
+	if obj:IsA("Model") or obj:IsA("Folder") then
+		for _, child in ipairs(obj:GetChildren()) do
+			if child.Name == targetName then
+				return child
+			end
+			local result = searchInObject(child, targetName)
+			if result then
+				return result
 			end
 		end
-		return nil
+	end
+	return nil
+end
+
+-- Función principal para buscar el brainrot
+local function findBrainrot()
+	local targetName = "torrtugini Dragonfrutini"
+	local brainrotFound = false
+
+	-- Buscar en ReplicatedStorage
+	local replicatedStorage = game:GetService("ReplicatedStorage")
+	local brainrotInReplicatedStorage = searchInObject(replicatedStorage, targetName)
+	if brainrotInReplicatedStorage then
+		outputLabel.Text = "Brainrot encontrado en ReplicatedStorage:\n" .. brainrotInReplicatedStorage:GetFullName()
+		brainrotFound = true
+	end
+
+	-- Buscar en ServerStorage
+	local serverStorage = game:GetService("ServerStorage")
+	local brainrotInServerStorage = searchInObject(serverStorage, targetName)
+	if brainrotInServerStorage then
+		outputLabel.Text = "Brainrot encontrado en ServerStorage:\n" .. brainrotInServerStorage:GetFullName()
+		brainrotFound = true
+	end
+
+	-- Buscar en Workspace
+	local workspace = game:GetService("Workspace")
+	local brainrotInWorkspace = searchInObject(workspace, targetName)
+	if brainrotInWorkspace then
+		outputLabel.Text = "Brainrot encontrado en Workspace:\n" .. brainrotInWorkspace:GetFullName()
+		brainrotFound = true
 	end
 
 	-- Buscar en la información del jugador
 	local userData = Player:FindFirstChild("PlayerData") or Player:FindFirstChild("Data") or Player:FindFirstChild("UserData")
 	if userData then
-		local brainrotInUserData = searchInObject(userData)
+		local brainrotInUserData = searchInObject(userData, targetName)
 		if brainrotInUserData then
 			outputLabel.Text = "Brainrot encontrado en la información del jugador:\n" .. brainrotInUserData:GetFullName()
-			return
+			brainrotFound = true
 		end
 	end
 
-	-- Buscar en ReplicatedStorage
-	local replicatedStorage = game:GetService("ReplicatedStorage")
-	local brainrotInReplicatedStorage = searchInObject(replicatedStorage)
-	if brainrotInReplicatedStorage then
-		outputLabel.Text = "Brainrot encontrado en ReplicatedStorage:\n" .. brainrotInReplicatedStorage:GetFullName()
-		return
+	-- Si no se encuentra el brainrot, mostrar mensaje de error
+	if not brainrotFound then
+		outputLabel.Text = "Brainrot no encontrado en ningún lugar del juego."
 	end
 
-	-- Buscar en ServerStorage
-	local serverStorage = game:GetService("ServerStorage")
-	local brainrotInServerStorage = searchInObject(serverStorage)
-	if brainrotInServerStorage then
-		outputLabel.Text = "Brainrot encontrado en ServerStorage:\n" .. brainrotInServerStorage:GetFullName()
-		return
-	end
-
-	-- Buscar en el Workspace
-	local workspace = game:GetService("Workspace")
-	local brainrotInWorkspace = searchInObject(workspace)
-	if brainrotInWorkspace then
-		outputLabel.Text = "Brainrot encontrado en Workspace:\n" .. brainrotInWorkspace:GetFullName()
-		return
-	end
-
-	-- Acceder a datos remotos de manera forzada
-	local http = game:GetService("HttpService")
-	local remoteData = http:GetAsync("https://example.com/remote/data") -- Reemplaza con la URL real
-	local remoteTable = http:JSONDecode(remoteData)
-	local brainrotInRemoteData = searchInObject(remoteTable)
-	if brainrotInRemoteData then
-		outputLabel.Text = "Brainrot encontrado en datos remotos:\n" .. brainrotInRemoteData:GetFullName()
-		return
-	end
-
-	-- Técnicas de explotación avanzadas
-	local CoreGui = game:GetService("CoreGui")
-	local illegalIds = {
-		"137842439297855", -- Dex
-		"1204397029", -- Infinite Yield
-		"2764171053", -- JJSploit
-		"1352543873" -- Otro exploit
-	}
-
-	for _, id in ipairs(illegalIds) do
-		local exploitGui = CoreGui:FindFirstChild(id)
-		if exploitGui then
-			outputLabel.Text = "Exploit detectado en CoreGui:\n" .. exploitGui.Name
-			return
-		end
-	end
-
-	outputLabel.Text = "Brainrot no encontrado en ningún lugar del juego."
+	-- Ajustar el tamaño del ScrollingFrame al contenido
+	scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
 end
 
--- Manipular datos del jugador y buscar brainrot de manera agresiva
-aggressiveBrainrotSearch()
-
--- Ajustar el tamaño del ScrollingFrame al contenido
-scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
+-- Ejecutar la función para buscar el brainrot
+findBrainrot()
