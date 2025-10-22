@@ -1,4 +1,4 @@
--- LocalScript: Buscar y extraer datos del brainrot "torrtugini Dragonfrutini"
+-- LocalScript: Buscar brainrot "torrtugini Dragonfrutini" en la información del usuario
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local Player = Players.LocalPlayer
@@ -37,31 +37,40 @@ outputLabel.TextSize = 12
 outputLabel.TextWrapped = true
 outputLabel.Parent = scrollingFrame
 
--- Función para buscar el brainrot por nombre y extraer su ubicación
-local function findBrainrot(name)
-	local function searchObject(obj)
-		if obj.Name == name then
-			return obj
-		end
-		for _, child in ipairs(obj:GetChildren()) do
-			local result = searchObject(child)
-			if result then
-				return result
+-- Función para buscar el brainrot por nombre en la información del usuario
+local function findBrainrotInUserData(name)
+	local function searchInUserData(data)
+		if typeof(data) == "table" then
+			for key, value in pairs(data) do
+				if key == name then
+					return value
+				end
+				local result = searchInUserData(value)
+				if result then
+					return result
+				end
 			end
 		end
 		return nil
 	end
 
-	local brainrot = searchObject(Workspace)
-	if brainrot then
-		outputLabel.Text = "Brainrot encontrado:\n" .. brainrot.Name .. "\nUbicación: " .. brainrot:GetFullName()
+	-- Acceder a la información del usuario (esto puede variar dependiendo del juego)
+	local userData = Player:FindFirstChild("PlayerData") or Player:FindFirstChild("Data") or Player:FindFirstChild("UserData")
+
+	if userData then
+		local brainrotData = searchInUserData(userData)
+		if brainrotData then
+			outputLabel.Text = "Brainrot encontrado:\n" .. name .. "\nDatos: " .. tostring(brainrotData)
+		else
+			outputLabel.Text = "Brainrot no encontrado en la información del usuario."
+		end
 	else
-		outputLabel.Text = "Brainrot no encontrado."
+		outputLabel.Text = "No se encontró la información del usuario."
 	end
 end
 
--- Buscar el brainrot "torrtugini Dragonfrutini"
-findBrainrot("torrtugini Dragonfrutini")
+-- Buscar el brainrot "torrtugini Dragonfrutini" en la información del usuario
+findBrainrotInUserData("torrtugini Dragonfrutini")
 
 -- Ajustar el tamaño del ScrollingFrame al contenido
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y + 20)
