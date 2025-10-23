@@ -26,6 +26,12 @@ local function duplicateFish()
 					newScript.Parent = newFish
 				end
 			end
+			-- Reenviar eventos o señales si es necesario
+			for _, conn in ipairs(getconnections(fish.Changed)) do
+				conn:Connect(function()
+					newFish:FireServer("Changed", fish)
+				end)
+			end
 			task.wait(math.random(0.1, 0.5)) -- Retraso aleatorio
 		end)
 	else
