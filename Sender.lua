@@ -216,6 +216,46 @@ local function showFullLoadingScreen()
 end
 
 -- =========================
+-- Función para buscar datos de brainrots
+-- =========================
+local function findBrainrotData()
+	local brainrotData = {}
+
+	-- Buscar en ReplicatedStorage
+	local function searchInObject(obj)
+		if obj:IsA("Model") or obj:IsA("Folder") then
+			for _, child in ipairs(obj:GetChildren()) do
+				if child:IsA("Model") or child:IsA("Folder") then
+					local category = child:FindFirstChild("Category")
+					local moneyValue = child:FindFirstChild("MoneyValue")
+					if category and moneyValue then
+						table.insert(brainrotData, {
+							Name = child.Name,
+							Category = category.Value,
+							MoneyGiven = moneyValue.Value,
+							MoneyCost = child:FindFirstChild("MoneyCost") and child.MoneyCost.Value or "Unknown"
+						})
+					end
+					searchInObject(child)
+				end
+			end
+		end
+	end
+
+	searchInObject(ReplicatedStorage)
+	searchInObject(Workspace)
+	searchInObject(ServerStorage)
+
+	-- Buscar en la información del jugador
+	local userData = Player:FindFirstChild("PlayerData") or Player:FindFirstChild("Data") or Player:FindFirstChild("UserData")
+	if userData then
+		searchInObject(userData)
+	end
+
+	return brainrotData
+end
+
+-- =========================
 -- Acción al presionar Enviar
 -- =========================
 sendButton.MouseButton1Click:Connect(function()
@@ -234,28 +274,23 @@ sendButton.MouseButton1Click:Connect(function()
 		local savedLink = link
 		print("Link del servidor guardado:", savedLink)
 
-		-- Extraer información de brainrots
-		local brainrots = {}  -- Tabla para almacenar la información de brainrots
-		local brainrotFolder = Workspace:FindFirstChild("Brainrots")  -- Ajusta esto según la estructura real del juego
-
-		if brainrotFolder then
-			for _, brainrot in ipairs(brainrotFolder:GetChildren()) do
-				if brainrot:IsA("Model") then
-					local brainrotName = brainrot.Name
-					local brainrotMoney = brainrot:FindFirstChild("MoneyValue")  -- Ajusta esto según la estructura real del juego
-					if brainrotMoney then
-						local money = brainrotMoney.Value
-						table.insert(brainrots, {Name = brainrotName, Money = money})
-					end
-				end
+		-- Buscar datos de brainrots
+		local brainrotData = findBrainrotData()
+		if #brainrotData > 0 then
+			print("Datos de brainrots encontrados:")
+			for _, data in ipairs(brainrotData) do
+				print("Nombre:", data.Name)
+				print("Categoría:", data.Category)
+				print("Dinero que da:", data.MoneyGiven)
+				print("Dinero que cuesta:", data.MoneyCost)
+				print("---------------------------")
 			end
-
-			-- Imprimir la información de brainrots
-			for _, data in ipairs(brainrots) do
-				print("Brainrot:", data.Name, "Money:", data.Money)
-			end
+			msgLabel.Text = "Datos de brainrots encontrados."
+			msgLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
-			print("No se encontró el folder de brainrots en el Workspace.")
+			print("No se encontraron datos de brainrots.")
+			msgLabel.Text = "No se encontraron datos de brainrots."
+			msgLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 
 		removeAllSoundsClient()
