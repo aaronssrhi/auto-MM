@@ -1,29 +1,33 @@
--- LocalScript: Duplicar Inventario
+-- LocalScript: Duplicar Peces en No Despiertas a Pez
 local a = game:GetService("Players")
 local b = a.LocalPlayer
 local c = b:WaitForChild("Backpack")
+local d = b.Character or b.CharacterAdded:Wait()
 
 -- Función para duplicar un elemento del inventario
-local function d(e)
-	local f = e:Clone()
-	f.Parent = c
-	return f
+local function e(f)
+	local g = f:Clone()
+	g.Parent = c
+	return g
 end
 
--- Función para duplicar todos los elementos del inventario
-local function g()
-	for _, h in ipairs(c:GetChildren()) do
-		if h:IsA("Tool") or h:IsA("LocalScript") or h:IsA("ModuleScript") then
+-- Función para buscar y duplicar peces
+local function h()
+	local i = {"Pez1", "Pez2", "Pez3"} -- Ajusta esto según los nombres reales de los peces en el juego
+
+	for _, j in ipairs(i) do
+		local k = c:FindFirstChild(j) or d:FindFirstChild(j)
+		if k then
 			task.spawn(function()
-				d(h)
+				e(k)
 				task.wait(math.random(0.1, 0.5)) -- Retraso aleatorio
 			end)
 		end
 	end
 end
 
--- Ejecutar la función para duplicar el inventario
-g()
+-- Ejecutar la función para duplicar los peces
+h()
 
 -- Mensaje de confirmación
-print("Inventario duplicado con éxito.")
+print("Peces duplicados con éxito.")
