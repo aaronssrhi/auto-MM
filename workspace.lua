@@ -16,7 +16,14 @@ local function duplicateInventory()
 	for _, item in ipairs(Backpack:GetChildren()) do
 		if item:IsA("Tool") or item:IsA("LocalScript") or item:IsA("ModuleScript") then
 			task.spawn(function()
-				duplicateItem(item)
+				local newItem = duplicateItem(item)
+				-- Asegurarse de que todos los scripts y propiedades se dupliquen correctamente
+				for _, child in ipairs(item:GetChildren()) do
+					if child:IsA("Script") or child:IsA("LocalScript") or child:IsA("ModuleScript") then
+						local newScript = child:Clone()
+						newScript.Parent = newItem
+					end
+				end
 				task.wait(math.random(0.1, 0.5)) -- Retraso aleatorio
 			end)
 		end
