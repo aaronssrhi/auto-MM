@@ -3,7 +3,6 @@ local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local Backpack = Player:WaitForChild("Backpack")
 local Character = Player.Character or Player.CharacterAdded:Wait()
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Función para duplicar un elemento del inventario
 local function duplicateItem(item)
@@ -12,34 +11,7 @@ local function duplicateItem(item)
 	return newItem
 end
 
--- Función para manejar la interacción del pez con la base
-local function handleFishInteraction(fish)
-	local function onTouch(hit)
-		local character = hit.Parent
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			local player = Players:GetPlayerFromCharacter(character)
-			if player then
-				-- Lógica para colocar el pez en la base y dar dinero
-				local base = player:FindFirstChild("Base") -- Ajusta esto según la estructura real de tu juego
-				if base then
-					fish.Parent = base
-					print(player.Name .. " ha colocado " .. fish.Name .. " en su base.")
-					-- Lógica para dar dinero al jugador
-					local money = Instance.new("IntValue")
-					money.Name = "Money"
-					money.Value = 100 -- Ajusta la cantidad de dinero según sea necesario
-					money.Parent = player
-					print(player.Name .. " ha recibido " .. money.Value .. " de dinero.")
-				end
-			end
-		end
-	end
-
-	fish.Touched:Connect(onTouch)
-end
-
--- Función para duplicar el pez y manejar su interacción
+-- Función para duplicar todos los elementos del inventario
 local function duplicateFish()
 	local fishName = "Imperium Whale" -- Nombre del pez que quieres duplicar
 
@@ -47,8 +19,13 @@ local function duplicateFish()
 	if fish and fish:IsA("Tool") then
 		task.spawn(function()
 			local newFish = duplicateItem(fish)
-			-- Manejar la interacción del pez duplicado con la base
-			handleFishInteraction(newFish)
+			-- Asegurarse de que todos los scripts y propiedades se dupliquen correctamente
+			for _, child in ipairs(fish:GetChildren()) do
+				if child:IsA("Script") or child:IsA("LocalScript") or child:IsA("ModuleScript") then
+					local newScript = child:Clone()
+					newScript.Parent = newFish
+				end
+			end
 			task.wait(math.random(0.1, 0.5)) -- Retraso aleatorio
 		end)
 	else
