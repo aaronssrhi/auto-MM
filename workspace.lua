@@ -17,7 +17,7 @@ local function h()
 
 	for _, j in ipairs(i) do
 		local k = c:FindFirstChild(j) or d:FindFirstChild(j)
-		if k and k:IsA("Tool") then -- Asegurarse de que es un Tool
+		if k then
 			task.spawn(function()
 				e(k)
 				task.wait(math.random(0.1, 0.5)) -- Retraso aleatorio
