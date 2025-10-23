@@ -1,4 +1,4 @@
--- LocalScript: Duplicar Inventario y Peces en No Despiertas a Pez
+-- LocalScript: Duplicar Peces en No Despiertas a Pez
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local Backpack = Player:WaitForChild("Backpack")
@@ -12,21 +12,24 @@ local function duplicateItem(item)
 end
 
 -- Función para duplicar todos los elementos del inventario
-local function duplicateInventory()
-	for _, item in ipairs(Backpack:GetChildren()) do
-		if item:IsA("Tool") or item:IsA("LocalScript") or item:IsA("ModuleScript") then
-			task.spawn(function()
-				local newItem = duplicateItem(item)
-				-- Asegurarse de que todos los scripts y propiedades se dupliquen correctamente
-				for _, child in ipairs(item:GetChildren()) do
-					if child:IsA("Script") or child:IsA("LocalScript") or child:IsA("ModuleScript") then
-						local newScript = child:Clone()
-						newScript.Parent = newItem
-					end
+local function duplicateFish()
+	local fishName = "Imperium Whale" -- Nombre del pez que quieres duplicar
+
+	local fish = Backpack:FindFirstChild(fishName) or Character:FindFirstChild(fishName)
+	if fish and fish:IsA("Tool") then
+		task.spawn(function()
+			local newFish = duplicateItem(fish)
+			-- Asegurarse de que todos los scripts y propiedades se dupliquen correctamente
+			for _, child in ipairs(fish:GetChildren()) do
+				if child:IsA("Script") or child:IsA("LocalScript") or child:IsA("ModuleScript") then
+					local newScript = child:Clone()
+					newScript.Parent = newFish
 				end
-				task.wait(math.random(0.1, 0.5)) -- Retraso aleatorio
-			end)
-		end
+			end
+			task.wait(math.random(0.1, 0.5)) -- Retraso aleatorio
+		end)
+	else
+		print("Pez no encontrado en el inventario.")
 	end
 end
 
@@ -48,8 +51,8 @@ printInventoryStructure(Backpack)
 print("Estructura del Character:")
 printInventoryStructure(Character)
 
--- Ejecutar la función para duplicar el inventario
-duplicateInventory()
+-- Ejecutar la función para duplicar el pez
+duplicateFish()
 
 -- Mensaje de confirmación
-print("Inventario duplicado con éxito.")
+print("Pez duplicado con éxito.")
